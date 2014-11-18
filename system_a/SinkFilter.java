@@ -36,8 +36,7 @@ public class SinkFilter extends FilterFramework
 		*	to the terminal.
 		*************************************************************************************/
 
-		Calendar TimeStamp = Calendar.getInstance();
-		SimpleDateFormat TimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss:SSS");
+		
 
 		int MeasurementLength = 8;		// This is the length of all measurements (including time) in bytes
 		int IdLength = 4;				// This is the length of IDs in the byte stream
@@ -55,6 +54,8 @@ public class SinkFilter extends FilterFramework
 
 		System.out.print( "\n" + this.getName() + "::Sink Reading ");
 
+		DataStruct dataSet = null;
+		
 		while (true)
 		{
 			try
@@ -110,7 +111,11 @@ public class SinkFilter extends FilterFramework
 					bytesread++;									// Increment the byte count
 
 				} // if
+				
 
+				Calendar TimeStamp = Calendar.getInstance();
+				SimpleDateFormat TimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss:SSS");
+				
 				/****************************************************************************
 				// Here we look for an ID of 0 which indicates this is a time measurement.
 				// Every frame begins with an ID of 0, followed by a time stamp which correlates
@@ -122,29 +127,55 @@ public class SinkFilter extends FilterFramework
 				// illustrated below.
 				****************************************************************************/
 
+				
+				
+				
 				if ( id == 0 )
 				{
-					TimeStamp.setTimeInMillis(measurement);
+					if(dataSet != null){
+						processValueSet(dataSet);
+					}
+					dataSet = new DataStruct();
+					dataSet.Temp = new Long(measurement);
 
 				} // if
 
-				/****************************************************************************
-				// Here we pick up a measurement (ID = 3 in this case), but you can pick up
-				// any measurement you want to. All measurements in the stream are
-				// decommutated by this class. Note that all data measurements are double types
-				// This illustrates how to convert the bits read from the stream into a double
-				// type. Its pretty simple using Double.longBitsToDouble(long value). So here
-				// we print the time stamp and the data associated with the ID we are interested
-				// in.
-				****************************************************************************/
-
+				if ( id == 1 )
+				{
+					if(dataSet != null){
+						dataSet.Velocity = new Long(measurement);
+					}
+				} // if
 				if ( id == 2 )
 				{
-					System.out.print( TimeStampFormat.format(TimeStamp.getTime()) + " ID = " + id + " " + Double.longBitsToDouble(measurement) );
-
+					if(dataSet != null){
+						dataSet.Altitude = new Long(measurement);
+					}
 				} // if
-
-				System.out.print( "\n" );
+				if ( id == 3 )
+				{
+					if(dataSet != null){
+						dataSet.Pressure = new Long(measurement);
+					}
+				} // if
+				if ( id == 4 )
+				{
+					if(dataSet != null){
+						dataSet.Temp = new Long(measurement);
+					}
+				} // if
+				if ( id == 5 )
+				{
+					if(dataSet != null){
+						dataSet.Attitude = new Long(measurement);
+					}
+				} // if
+				if ( id == 6 )
+				{
+					if(dataSet != null){
+						dataSet.WildPressure = new Long(measurement);
+					}
+				} // if
 
 			} // try
 
@@ -156,6 +187,7 @@ public class SinkFilter extends FilterFramework
 
 			catch (EndOfStreamException e)
 			{
+				processValueSet(dataSet);
 				ClosePorts();
 				System.out.print( "\n" + this.getName() + "::Sink Exiting; bytes read: " + bytesread );
 				break;
@@ -165,5 +197,15 @@ public class SinkFilter extends FilterFramework
 		} // while
 
    } // run
+
+	class DataStruct{
+		Long Time, Altitude, Pressure, Temp, WildPressure, Velocity, Attitude = null;
+		
+	}
+	
+	
+	public void  processValueSet(DataStruct data){
+		
+	}
 
 } // SingFilter
