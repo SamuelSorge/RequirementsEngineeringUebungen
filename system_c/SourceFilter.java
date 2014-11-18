@@ -21,10 +21,15 @@ import java.io.*; // note we must add this here since we use BufferedReader clas
 
 public class SourceFilter extends FilterFramework
 {
-	public void run()
+    private String m_filename;
+    SourceFilter(String filename)
+    {
+        m_filename = filename;
+    }
+
+    public void run()
     {
 
-		String fileName = "FlightData.dat";	// Input data file.
 		int bytesread = 0;					// Number of bytes read from the input file.
 		int byteswritten = 0;				// Number of bytes written to the stream.
 		DataInputStream in = null;			// File stream reference.
@@ -36,7 +41,7 @@ public class SourceFilter extends FilterFramework
 			*	Here we open the file and write a message to the terminal.
 			***********************************************************************************/
 
-			in = new DataInputStream(new FileInputStream(fileName));
+			in = new DataInputStream(new FileInputStream(m_filename));
 			System.out.println("\n" + this.getName() + "::Source reading file..." );
 
 			/***********************************************************************************

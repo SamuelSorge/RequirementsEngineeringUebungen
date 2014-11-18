@@ -28,88 +28,132 @@ public class MiddleMergerFilter extends FilterFramework2Sources
 {
 		static int MeasurementLength = 8;		// This is the length of all measurements (including time) in bytes
 		static int IdLength = 4;				// This is the length of IDs in the byte stream
-		int bytesread;				// This is the number of bytes read from the stream
-		int byteswritten;				// Number of bytes written to the stream.
+		private int bytesread;				// This is the number of bytes read from the stream
+		private int byteswritten;				// Number of bytes written to the stream.
+		private int id1;						// This is the measurement id
+		private int id2;						// This is the measurement id
+                private HashMap<Integer, Long> myCurrentFrame_stream1 = new HashMap<Integer, Long>();
+                private HashMap<Integer, Long> myCurrentFrame_stream2 = new HashMap<Integer, Long>();
 
 	public void run()
         {
+                id1 = -1;
+                id2 = -1;
                 bytesread = 0;
                 byteswritten = 0;
 		byte databyte = 0;				// This is the data byte read from the stream
 
 		long measurement;				// This is the word used to store all measurements - conversions are illustrated.
-		int id1;						// This is the measurement id
-		int id2;						// This is the measurement id
 		int i;						// This is a loop counter
                 double last_valid_point = 0.0;
 
-                HashMap<Integer, Long> myCurrentFrame_stream1 = new HashMap<Integer, Long>();
-                HashMap<Integer, Long> myCurrentFrame_stream2 = new HashMap<Integer, Long>();
 
 		// Next we write a message to the terminal to let the world know we are alive...
 
-		System.out.print( "\n" + this.getName() + "::Middle Reading ");
+		System.out.print( "\n" + this.getName() + "::MiddleMergerFilter Reading ");
 
 		while (true)
-		{
-			/*************************************************************
-			*	Here we read a byte and write a byte
-			*************************************************************/
-			try
-			{
-                            id1 = ReadIdFormInput1();
-                            if(id1 == 0 && myCurrentFrame_stream1.size() > 0)
-                            {
-                                try
-                                {
-                                    id2 = ReadIdFormInput2();
-                                    if(id2 == 0 && myCurrentFrame_stream2.size() > 0)
-                                    {
-                                        // we have read an complete frame from input 1 and a complete frame from input2
-                                        // now check which one we sould output
-                                        if(myCurrentFrame_stream1.get(0) <= myCurrentFrame_stream2.get(0))
-                                        {
-                                            WriteMapToOutputPort(myCurrentFrame_stream1);
-                                            myCurrentFrame_stream1.clear();
-                                        }
-                                        else
-                                        {
-                                            WriteMapToOutputPort(myCurrentFrame_stream2);
-                                            myCurrentFrame_stream2.clear();
-                                        }
-                                    }
-                                    measurement = ReadDataFromInput2();
-                                    myCurrentFrame_stream2.put(id2, measurement);
-                                }
-                                // we reached end of stream2 so just write the data from stream1
-                                catch( EndOfStreamException e)
-                                {
-                                    WriteMapToOutputPort(myCurrentFrame_stream1);
-                                    myCurrentFrame_stream1.clear();
-                                    System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
-                                    break;
-                                }
+                {
+                    /*************************************************************
+                     *	Here we read a byte and write a byte
+                     *************************************************************/
+                    boolean s1 = ReadFrameFrom1();
+                    boolean s2 = ReadFrameFrom2();
+                    if(s1 && s2)
+                    {
+                        // we have read an complete frame from input 1 and a complete frame from input2
+                        // now check which one we sould output
+                        if(myCurrentFrame_stream1.get(0) <= myCurrentFrame_stream2.get(0))
+                        {
+                            WriteMapToOutputPort(myCurrentFrame_stream1);
+                            myCurrentFrame_stream1.clear();
+                        }
+                        else
+                        {
+                            WriteMapToOutputPort(myCurrentFrame_stream2);
+                            myCurrentFrame_stream2.clear();
+                        }
+                    }
+                    else if(s1)
+                    {
+                        WriteMapToOutputPort(myCurrentFrame_stream1);
+                        myCurrentFrame_stream1.clear();
+                    }
+                    else if(s2)
+                    {
+                        WriteMapToOutputPort(myCurrentFrame_stream2);
+                        myCurrentFrame_stream2.clear();
+                    }
+                    if(!s1 && !s2)
+                    {
+                        ClosePorts();
+                        System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
+                        break;
+                    }
 
-                            }
-                            measurement = ReadDataFromInput1();
-                            myCurrentFrame_stream1.put(id1, measurement);
-			} // try
-
-			catch (EndOfStreamException e)
-			{
-				ClosePorts();
-				System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
-				break;
-			} // catch
-
-		} // while
+                } // while
    } // run
+
+    boolean ReadFrameFrom1()
+    {
+        long measurement;
+        while(true)
+        {
+            try
+            {
+                if(id1 == -1)
+                {
+                    id1 = ReadIdFormInput1();
+                }
+                if(id1 == 0 && myCurrentFrame_stream1.size() > 0)
+                {
+                    return true;
+                }
+                measurement = ReadDataFromInput1();
+                myCurrentFrame_stream1.put(id1, measurement);
+                id1 = -1;
+            }
+            catch (EndOfStreamException e)
+            {
+                System.out.print( "\n" + this.getName() + "::Middle Exiting; End of stream1 bytes read: " + bytesread + " bytes written: " + byteswritten );
+                break;
+            } // catch
+        }
+        return false;
+    }
+
+    boolean ReadFrameFrom2()
+    {
+        long measurement;
+        while(true)
+        {
+            try
+            {
+                if(id2 == -1)
+                {
+                    id2 = ReadIdFormInput2();
+                }
+                if(id2 == 0 && myCurrentFrame_stream2.size() > 0)
+                {
+                    return true;
+                }
+                measurement = ReadDataFromInput2();
+                myCurrentFrame_stream2.put(id2, measurement);
+                id2 = -1;
+            }
+            catch (EndOfStreamException e)
+            {
+                System.out.print( "\n" + this.getName() + "::Middle Exiting; End of stream2 bytes read: " + bytesread + " bytes written: " + byteswritten );
+                break;
+            } // catch
+        }
+        return false;
+    }
 
     int WriteMapToOutputPort(HashMap<Integer,Long> hm)
     {
         byte databyte = 0;
         int i;
-        int byteswritten = 0;
         for(Map.Entry<Integer,Long> entry : hm.entrySet())
         {
             for (i=IdLength-1; i>=0; i-- )
@@ -125,7 +169,6 @@ public class MiddleMergerFilter extends FilterFramework2Sources
                 byteswritten++;
             }
         }
-        System.out.println("Written: "+hm);
         return byteswritten;
     }
 

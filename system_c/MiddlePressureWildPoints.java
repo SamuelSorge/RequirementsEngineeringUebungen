@@ -46,7 +46,7 @@ public class MiddlePressureWildPoints extends FilterFramework
 
 		// Next we write a message to the terminal to let the world know we are alive...
 
-		System.out.print( "\n" + this.getName() + "::Middle Reading ");
+		System.out.print( "\n" + this.getName() + "::MiddlePressureWildPoints Reading ");
 
 		while (true)
 		{
@@ -210,7 +210,6 @@ public class MiddlePressureWildPoints extends FilterFramework
                 byteswritten++;
             }
         }
-        System.out.println("Written: "+hm);
         return byteswritten;
     }
 

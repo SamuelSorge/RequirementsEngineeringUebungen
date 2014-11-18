@@ -61,6 +61,7 @@ public class FilterFramework2Sources extends FilterFramework
         {
             // Connect this filter's input to the upstream pipe's output stream
             filter2.Connect(Filter);
+            filter2.start();
         } // Connect2
 
 	/***************************************************************************

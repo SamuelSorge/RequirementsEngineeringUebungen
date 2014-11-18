@@ -26,12 +26,11 @@ public class SystemC
 		* Here we instantiate three filters.
 		****************************************************************************/
 
-		SourceFilter FilterS1 = new SourceFilter();
-		SourceFilter FilterS2 = new SourceFilter();
+		SourceFilter FilterS1 = new SourceFilter("SubSetA.dat");
+		SourceFilter FilterS2 = new SourceFilter("SubSetB.dat");
                 MiddleMergerFilter FilterM = new MiddleMergerFilter();
-
-                MiddlePressureWildPoints Filter2 = new MiddlePressureWildPoints();
-		SinkFilter FilterSink = new SinkFilter();
+                MiddlePressureWildPoints FilterW = new MiddlePressureWildPoints();
+		SinkFilter FilterSink = new SinkE3();
 
 		/****************************************************************************
 		* Here we connect the filters starting with the sink filter (Filter 1) which
@@ -39,8 +38,8 @@ public class SystemC
 		* source filter (Filter3).
 		****************************************************************************/
 
-		FilterSink.Connect(Filter2);
-		Filter2.Connect(FilterM);
+		FilterSink.Connect(FilterW);
+		FilterW.Connect(FilterM);
 		FilterM.Connect(FilterS1);
 		FilterM.Connect2(FilterS2);
 
@@ -51,7 +50,7 @@ public class SystemC
 		FilterS1.start();
 		FilterS2.start();
                 FilterM.start();
-		Filter2.start();
+		FilterW.start();
 		FilterSink.start();
 
    } // main
