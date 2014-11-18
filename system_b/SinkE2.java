@@ -98,7 +98,7 @@ public class SinkE2 extends SinkFilter{
 				DecimalFormatSymbols pressureDecimalFormatSymbols = new DecimalFormatSymbols();
 				pressureDecimalFormatSymbols.setDecimalSeparator(':');
 				DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
-				printString += pressureDecimalFormat.format(Double.longBitsToDouble(data.WildPressure.longValue()));
+				wildString += pressureDecimalFormat.format(Double.longBitsToDouble(data.WildPressure.longValue()));
 				
 				wildString  += "\n";
 				
