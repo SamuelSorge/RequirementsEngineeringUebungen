@@ -65,7 +65,7 @@ public class SinkE3 extends SinkFilter{
 		if(data.Temp != null){
 			DecimalFormatSymbols tempDecimalFormatSymbols = new DecimalFormatSymbols();
 			tempDecimalFormatSymbols.setDecimalSeparator('.');
-			DecimalFormat TempdecimalFormat = new DecimalFormat("000.000", tempDecimalFormatSymbols);
+			DecimalFormat TempdecimalFormat = new DecimalFormat("+#,000.000;-#", tempDecimalFormatSymbols);
 			printString += TempdecimalFormat.format(Double.longBitsToDouble(data.Temp.longValue()));
 		}
 		printString += "\t";
