@@ -16,7 +16,6 @@ public class SinkE1 extends SinkFilter{
 		
 		if(firstWrite){
 			File f = new File(fileName);
-			f.mkdirs(); 
 			try {
 				f.createNewFile();
 			} catch (IOException e) {

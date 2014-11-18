@@ -136,7 +136,7 @@ public class SinkFilter extends FilterFramework
 						processValueSet(dataSet);
 					}
 					dataSet = new DataStruct();
-					dataSet.Temp = new Long(measurement);
+					dataSet.Time = new Long(measurement);
 
 				} // if
 
