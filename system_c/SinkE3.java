@@ -1,3 +1,4 @@
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,27 +10,50 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
-public class SinkE2 extends SinkFilter{
-	boolean firstWriteOutputB = true;
+public class SinkE3 extends SinkFilter{
+	boolean firstWriteOutputC = true;
 	boolean firstWriteWildPoints = true;
-	String fileName = "OutputB.dat";
-	String wildPointFileName = "WildPoints.dat";
+	boolean firstWriteLessThan10K = true;
+	String lessThan10KfileName = "LessThan10K.dat";
+	String standardFileName = "OutputC.dat";
+	String wildPointFileName = "PressureWildPoints.dat";
 	
 	public void processValueSet(DataStruct data) {
 		
-		if(firstWriteOutputB){
-			File f = new File(fileName);
-			f.mkdirs(); 
+		if(firstWriteOutputC){
+			File standardOutputFile = new File(standardFileName);
+			standardOutputFile.mkdirs(); 
 			try {
-				f.createNewFile();
-				firstWriteOutputB = false;
+				standardOutputFile.createNewFile();
+				firstWriteOutputC = false;
 			} catch (IOException e) {
 				System.out.print("Error while create output file.");
 			}
 		}
 		
+		if(firstWriteLessThan10K){
+			File lessThan10KFile = new File(lessThan10KfileName);
+			lessThan10KFile.mkdirs(); 
+			try {
+				lessThan10KFile.createNewFile();
+				firstWriteLessThan10K = false;
+			} catch (IOException e) {
+				System.out.print("Error while create output file.");
+			}
+		}
 		
-		
+		if(data.Altitude.longValue() <= 10000)
+		{
+			writeToFile(lessThan10KfileName, data);
+		}
+		else
+		{
+			writeToFile(standardFileName, data);
+		}		
+	}
+	
+	private void writeToFile(String fileName, DataStruct data)
+	{
 		String printString = "";
 
 		Calendar TimeStamp = Calendar.getInstance();
@@ -100,8 +124,7 @@ public class SinkE2 extends SinkFilter{
 				DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
 				printString += pressureDecimalFormat.format(Double.longBitsToDouble(data.WildPressure.longValue()));
 				
-				wildString  += "\n";
-				
+				wildString  += "\n";				
 				try {
 				    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(wildPointFileName, true)));
 				    out.println(wildString);
@@ -110,8 +133,5 @@ public class SinkE2 extends SinkFilter{
 					System.out.print("Error while create output file.");
 				}
 		}
-		
-		
 	}
-	
 }
