@@ -6,7 +6,7 @@ public class MiddleTemperatureFilter extends ConvertMiddleFilter
         if(id == 4)
         {
             double d = Double.longBitsToDouble(measurement);
-            measurement = Double.doubleToLongBits( d * 1.8 + 32);
+            measurement = Double.doubleToLongBits( (d - 32)/1.8 );
         }
         return measurement;
     }
