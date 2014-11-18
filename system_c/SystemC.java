@@ -18,7 +18,7 @@
 * Internal Methods:	None
 *
 ******************************************************************************************************************/
-public class SystemA
+public class SystemB
 {
    public static void main( String argv[])
    {
@@ -26,10 +26,14 @@ public class SystemA
 		* Here we instantiate three filters.
 		****************************************************************************/
 
-		SourceFilter Filter1 = new SourceFilter();
+		SourceFilter FilterS1 = new SourceFilter();
+		SourceFilter FilterS2 = new SourceFilter();
+                MiddleMergerFilter FilterM = new MiddleMergerFilter();
+
 		MiddleTemperatureFilter Filter2 = new MiddleTemperatureFilter();
 		MiddleAltitudeFilter Filter3 = new MiddleAltitudeFilter();
-		SinkFilter Filter4 = new SinkFilter();
+                MiddlePressureWildPoints Filter4 = new MiddlePressureWildPoints();
+		SinkFilter Filter5 = new SinkFilter();
 
 		/****************************************************************************
 		* Here we connect the filters starting with the sink filter (Filter 1) which
@@ -37,8 +41,9 @@ public class SystemA
 		* source filter (Filter3).
 		****************************************************************************/
 
-		Filter4.Connect(Filter3); // This esstially says, "connect Filter3 input port to Filter2 output port
-		Filter3.Connect(Filter2); // This esstially says, "connect Filter3 input port to Filter2 output port
+		Filter5.Connect(Filter4);
+		Filter4.Connect(Filter3);
+		Filter3.Connect(Filter2);
 		Filter2.Connect(Filter1); // This esstially says, "connect Filter2 intput port to Filter1 output port
 
 		/****************************************************************************
@@ -49,6 +54,7 @@ public class SystemA
 		Filter2.start();
 		Filter3.start();
 		Filter4.start();
+		Filter5.start();
 
    } // main
 

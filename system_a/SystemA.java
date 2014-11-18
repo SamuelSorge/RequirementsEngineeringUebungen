@@ -29,7 +29,7 @@ public class SystemA
 		SourceFilter Filter1 = new SourceFilter();
 		MiddleTemperatureFilter Filter2 = new MiddleTemperatureFilter();
 		MiddleAltitudeFilter Filter3 = new MiddleAltitudeFilter();
-		SinkFilter Filter4 = new SinkFilter();
+		SinkE1 Filter4 = new SinkE1();
 
 		/****************************************************************************
 		* Here we connect the filters starting with the sink filter (Filter 1) which
