@@ -18,7 +18,7 @@
 * Internal Methods:	None
 *
 ******************************************************************************************************************/
-public class SystemB
+public class SystemC
 {
    public static void main( String argv[])
    {
@@ -30,10 +30,8 @@ public class SystemB
 		SourceFilter FilterS2 = new SourceFilter();
                 MiddleMergerFilter FilterM = new MiddleMergerFilter();
 
-		MiddleTemperatureFilter Filter2 = new MiddleTemperatureFilter();
-		MiddleAltitudeFilter Filter3 = new MiddleAltitudeFilter();
-                MiddlePressureWildPoints Filter4 = new MiddlePressureWildPoints();
-		SinkFilter Filter5 = new SinkFilter();
+                MiddlePressureWildPoints Filter2 = new MiddlePressureWildPoints();
+		SinkFilter FilterSink = new SinkFilter();
 
 		/****************************************************************************
 		* Here we connect the filters starting with the sink filter (Filter 1) which
@@ -41,20 +39,20 @@ public class SystemB
 		* source filter (Filter3).
 		****************************************************************************/
 
-		Filter5.Connect(Filter4);
-		Filter4.Connect(Filter3);
-		Filter3.Connect(Filter2);
-		Filter2.Connect(Filter1); // This esstially says, "connect Filter2 intput port to Filter1 output port
+		FilterSink.Connect(Filter2);
+		Filter2.Connect(FilterM);
+		FilterM.Connect(FilterS1);
+		FilterM.Connect2(FilterS2);
 
 		/****************************************************************************
 		* Here we start the filters up. All-in-all,... its really kind of boring.
 		****************************************************************************/
 
-		Filter1.start();
+		FilterS1.start();
+		FilterS2.start();
+                FilterM.start();
 		Filter2.start();
-		Filter3.start();
-		Filter4.start();
-		Filter5.start();
+		FilterSink.start();
 
    } // main
 

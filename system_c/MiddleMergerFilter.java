@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 
-public class MiddlePressureWildPoints extends FilterFramework
+public class MiddleMergerFilter extends FilterFramework2Sources
 {
 		static int MeasurementLength = 8;		// This is the length of all measurements (including time) in bytes
 		static int IdLength = 4;				// This is the length of IDs in the byte stream
@@ -43,8 +43,8 @@ public class MiddlePressureWildPoints extends FilterFramework
 		int i;						// This is a loop counter
                 double last_valid_point = 0.0;
 
-                HashMap<Integer, Long> myCurrentFrame_stream1 = new HashMap<Integer, Long>;
-                HashMap<Integer, Long> myCurrentFrame_stream2 = new HashMap<Integer, Long>;
+                HashMap<Integer, Long> myCurrentFrame_stream1 = new HashMap<Integer, Long>();
+                HashMap<Integer, Long> myCurrentFrame_stream2 = new HashMap<Integer, Long>();
 
 		// Next we write a message to the terminal to let the world know we are alive...
 
@@ -57,45 +57,42 @@ public class MiddlePressureWildPoints extends FilterFramework
 			*************************************************************/
 			try
 			{
-                            while(!EndOfInputStream())
+                            id1 = ReadIdFormInput1();
+                            if(id1 == 0 && myCurrentFrame_stream1.size() > 0)
                             {
-                                id1 = ReadIdFormInput1();
-                                if(id1 == 0 && myCurrentFrame_stream1.size() > 0)
+                                try
                                 {
-                                    // we reached end of stream2 so just write the data from stream1
-                                    if(EndOfInput2Stream())
+                                    id2 = ReadIdFormInput2();
+                                    if(id2 == 0 && myCurrentFrame_stream2.size() > 0)
                                     {
-                                        WriteMapToOutputPort(myCurrentFrame_stream1);
-                                        myCurrentFrame_stream1.clear();
-                                    }
-
-                                    while(!EndOfInput2Stream())
-                                    {
-                                        id2 = ReadIdFormInput2();
-                                        if(id2 == 0 && myCurrentFrame_stream2.size() > 0)
+                                        // we have read an complete frame from input 1 and a complete frame from input2
+                                        // now check which one we sould output
+                                        if(myCurrentFrame_stream1.get(0) <= myCurrentFrame_stream2.get(0))
                                         {
-                                            // we have read an complete frame from input 1 and a complete frame from input2
-                                            // now check which one we sould output
-                                            if(myCurrentFrame_stream1.get(0) <= myCurrentFrame_stream2.get(0))
-                                            {
-                                                WriteMapToOutputPort(myCurrentFrame_stream1);
-                                                myCurrentFrame_stream1.clear();
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                WriteMapToOutputPort(myCurrentFrame_stream2);
-                                                myCurrentFrame_stream2.clear();
-                                            }
+                                            WriteMapToOutputPort(myCurrentFrame_stream1);
+                                            myCurrentFrame_stream1.clear();
                                         }
-                                        measurement = ReadDataFromInput2();
-                                        myCurrentFrame_stream2.put(id2, measurement);
+                                        else
+                                        {
+                                            WriteMapToOutputPort(myCurrentFrame_stream2);
+                                            myCurrentFrame_stream2.clear();
+                                        }
                                     }
-
+                                    measurement = ReadDataFromInput2();
+                                    myCurrentFrame_stream2.put(id2, measurement);
                                 }
-                                measurement = ReadDataFromInput1();
-                                myCurrentFrame_stream1.put(id1, measurement);
+                                // we reached end of stream2 so just write the data from stream1
+                                catch( EndOfStreamException e)
+                                {
+                                    WriteMapToOutputPort(myCurrentFrame_stream1);
+                                    myCurrentFrame_stream1.clear();
+                                    System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
+                                    break;
+                                }
+
                             }
+                            measurement = ReadDataFromInput1();
+                            myCurrentFrame_stream1.put(id1, measurement);
 			} // try
 
 			catch (EndOfStreamException e)
@@ -132,13 +129,14 @@ public class MiddlePressureWildPoints extends FilterFramework
         return byteswritten;
     }
 
-    int ReadIdFormInput1()
+    int ReadIdFormInput1() throws FilterFramework.EndOfStreamException
     {
         /***************************************************************************
         // We know that the first data coming to this filter is going to be an ID and
         // that it is IdLength long. So we first decommutate the ID bytes.
          ****************************************************************************/
         int id = 0;
+        byte databyte;
 
         for(int i=0; i<IdLength; i++ )
         {
@@ -158,17 +156,18 @@ public class MiddlePressureWildPoints extends FilterFramework
         return id;
     }
 
-    int ReadIdFormInput2()
+    int ReadIdFormInput2() throws FilterFramework.EndOfStreamException
     {
         /***************************************************************************
         // We know that the first data coming to this filter is going to be an ID and
         // that it is IdLength long. So we first decommutate the ID bytes.
          ****************************************************************************/
         int id = 0;
+        byte databyte;
 
         for(int i=0; i<IdLength; i++ )
         {
-            databyte = ReadFilter2InputPort();	// This is where we read the byte from the stream...
+            databyte = ReadFilterInput2Port();	// This is where we read the byte from the stream...
 
             id = id | (databyte & 0xFF);		// We append the byte on to ID...
 
@@ -185,7 +184,7 @@ public class MiddlePressureWildPoints extends FilterFramework
     }
 
 
-    long ReadDataFromInput1()
+    long ReadDataFromInput1() throws FilterFramework.EndOfStreamException
     {
         /****************************************************************************
         // Here we read measurements. All measurement data is read as a stream of bytes
@@ -200,8 +199,9 @@ public class MiddlePressureWildPoints extends FilterFramework
          *****************************************************************************/
 
         long measurement = 0;
+        byte databyte;
 
-        for (i=0; i<MeasurementLength; i++ )
+        for (int i=0; i<MeasurementLength; i++ )
         {
             databyte = ReadFilterInputPort();
             measurement = measurement | (databyte & 0xFF);	// We append the byte on to measurement...
@@ -219,7 +219,7 @@ public class MiddlePressureWildPoints extends FilterFramework
     }
 
 
-    long ReadDataFromInput2()
+    long ReadDataFromInput2() throws FilterFramework.EndOfStreamException
     {
         /****************************************************************************
         // Here we read measurements. All measurement data is read as a stream of bytes
@@ -234,8 +234,9 @@ public class MiddlePressureWildPoints extends FilterFramework
          *****************************************************************************/
 
         long measurement = 0;
+        byte databyte;
 
-        for (i=0; i<MeasurementLength; i++ )
+        for (int i=0; i<MeasurementLength; i++ )
         {
             databyte = ReadFilterInput2Port();
             measurement = measurement | (databyte & 0xFF);	// We append the byte on to measurement...
