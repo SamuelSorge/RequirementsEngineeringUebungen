@@ -17,7 +17,9 @@ public class SinkE1 extends SinkFilter{
 		if(firstWrite){
 			File f = new File(fileName);
 			try {
+				if(f.exists())f.delete();
 				f.createNewFile();
+				firstWrite = false;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				System.out.print("Error while create output file.");
@@ -34,7 +36,7 @@ public class SinkE1 extends SinkFilter{
 			if(data.Temp != null){
 				DecimalFormatSymbols tempDecimalFormatSymbols = new DecimalFormatSymbols();
 				tempDecimalFormatSymbols.setDecimalSeparator('.');
-				DecimalFormat TempdecimalFormat = new DecimalFormat("000.000", tempDecimalFormatSymbols);
+				DecimalFormat TempdecimalFormat = new DecimalFormat("+#,000.000;-#", tempDecimalFormatSymbols);
 				printString += TempdecimalFormat.format(Double.longBitsToDouble(data.Temp.longValue()));
 			}
 			printString += "\t";

@@ -19,8 +19,8 @@ public class SinkE2 extends SinkFilter{
 		
 		if(firstWriteOutputB){
 			File f = new File(fileName);
-			f.mkdirs(); 
 			try {
+				if(f.exists())f.delete();
 				f.createNewFile();
 				firstWriteOutputB = false;
 			} catch (IOException e) {
@@ -77,8 +77,8 @@ public class SinkE2 extends SinkFilter{
 		if(data.WildPressure != null){
 			if(firstWriteWildPoints){
 				File f = new File(wildPointFileName);
-				f.mkdirs(); 
 				try {
+					if(f.exists())f.delete();
 					f.createNewFile();
 					firstWriteWildPoints = false;
 				} catch (IOException e) {

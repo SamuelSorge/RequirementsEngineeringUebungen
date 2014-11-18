@@ -22,8 +22,8 @@ public class SinkE3 extends SinkFilter{
 		
 		if(firstWriteOutputC){
 			File standardOutputFile = new File(standardFileName);
-			standardOutputFile.mkdirs(); 
 			try {
+				if(standardOutputFile.exists())standardOutputFile.delete();
 				standardOutputFile.createNewFile();
 				firstWriteOutputC = false;
 			} catch (IOException e) {
@@ -33,8 +33,9 @@ public class SinkE3 extends SinkFilter{
 		
 		if(firstWriteLessThan10K){
 			File lessThan10KFile = new File(lessThan10KfileName);
-			lessThan10KFile.mkdirs(); 
+		
 			try {
+				if(lessThan10KFile.exists())lessThan10KFile.delete();
 				lessThan10KFile.createNewFile();
 				firstWriteLessThan10K = false;
 			} catch (IOException e) {
@@ -101,8 +102,9 @@ public class SinkE3 extends SinkFilter{
 		if(data.WildPressure != null){
 			if(firstWriteWildPoints){
 				File f = new File(wildPointFileName);
-				f.mkdirs(); 
+				
 				try {
+					if(f.exists())f.delete();
 					f.createNewFile();
 					firstWriteWildPoints = false;
 				} catch (IOException e) {
