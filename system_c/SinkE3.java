@@ -43,7 +43,7 @@ public class SinkE3 extends SinkFilter{
 			}
 		}
 		
-		if(data.Altitude.longValue() <= 10000)
+		if(Double.longBitsToDouble(data.Altitude.longValue()) <= 10000)
 		{
 			writeToFile(lessThan10KfileName, data);
 		}
