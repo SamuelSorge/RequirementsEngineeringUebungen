@@ -1,12 +1,37 @@
-
+/******************************************************************************************************************
+* File: MiddleTemperatureFilter.java
+* Course: 17655
+* Project: Assignment 1
+* Copyright: Copyright (c) 2003 Carnegie Mellon University
+* Versions:
+*	1.0 November 2014 - SystemA.
+*
+* Description:
+*
+* This class serves as middle filter to convert the temperature from Fahrenheit to Celsius.
+*
+* Parameters: none
+*
+* Internal Methods:	None
+*
+******************************************************************************************************************/
 public class MiddleTemperatureFilter extends ConvertMiddleFilter
 {
-    long ConvertData(int id, long measurement)
+	/****************************************************************************
+	* This function converts the temperature from Fahrenheit to Celsius if there
+	* is a matching ID.
+	*
+	* @param id used for comparison with the temperature id (=4)
+	* @param measurement used to store the converted data
+	*
+	* @return the converted temperature data
+	****************************************************************************/
+    long ConvertConvertData(int id, long measurement)
     {
         if(id == 4)
         {
-            double d = Double.longBitsToDouble(measurement);
-            measurement = Double.doubleToLongBits( (d - 32)/1.8 );
+            double temp = Double.longBitsToDouble(measurement);
+            measurement = Double.doubleToLongBits( (temp - 32)/1.8 );
         }
         return measurement;
     }

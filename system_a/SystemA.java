@@ -1,17 +1,16 @@
 /******************************************************************************************************************
-* File:SystemAr.java
+* File: SystemA.java
 * Course: 17655
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
-*	1.0 November 2008 - Sample Pipe and Filter code (ajl).
+*	1.0 November 2014 - SystemA.
 *
 * Description:
 *
-* This class serves as an example to illstrate how to use the PlumberTemplate to create a main thread that
-* instantiates and connects a set of filters. This example consists of three filters: a source, a middle filter
-* that acts as a pass-through filter (it does nothing to the data), and a sink filter which illustrates all kinds
-* of useful things that you can do with the input stream of data.
+* This class serves as main thread that* instantiates and connects a set of filters. 
+* This example consists of four filters: a source, two middle filters
+* that convert data, and a sink filter which generates an output file.
 *
 * Parameters: 		None
 *
@@ -23,32 +22,33 @@ public class SystemA
    public static void main( String argv[])
    {
 		/****************************************************************************
-		* Here we instantiate three filters.
+		* Here we instantiate three filters:
 		****************************************************************************/
 
-		SourceFilter Filter1 = new SourceFilter();
-		MiddleTemperatureFilter Filter2 = new MiddleTemperatureFilter();
-		MiddleAltitudeFilter Filter3 = new MiddleAltitudeFilter();
-		SinkE1 Filter4 = new SinkE1();
+		SourceFilter srcFilter = new SourceFilter();// srcFilter is a source filter which reads some input and writes it to its outport
+		MiddleTemperatureFilter midTempFilter = new MiddleTemperatureFilter();// midTempFilter is a middle filter which converts the altitude from feet to meters
+		MiddleAltitudeFilter midAltFilter = new MiddleAltitudeFilter();// midAltFilter is a middle filter which converts the temperature from Fahrenheit to Celsius
+		SinkE1 sinkFilter = new SinkE1();// sinkFilter is a sink filter which generates an output file "OutputA.dat" that contains the converted data in a given format
 
 		/****************************************************************************
-		* Here we connect the filters starting with the sink filter (Filter 1) which
-		* we connect to Filter2 the middle filter. Then we connect Filter2 to the
-		* source filter (Filter3).
+		* Here we connect the filters starting with the sink filter (sinkFilter) which
+		* we connect to midAltFilter the middle filter, which is used to convert feet in meters.
+		* Then we connect midAltFilter to midTempFilter which is used to convert the temperature from Fahrenheit to Celsius. .
+		* At last we connect midTempFilter to the source filter (srcFilter).
 		****************************************************************************/
 
-		Filter4.Connect(Filter3); // This esstially says, "connect Filter3 input port to Filter2 output port
-		Filter3.Connect(Filter2); // This esstially says, "connect Filter3 input port to Filter2 output port
-		Filter2.Connect(Filter1); // This esstially says, "connect Filter2 intput port to Filter1 output port
+		sinkFilter.Connect(midAltFilter);// Connect midAltFilter input port to sinkdFilter output port
+		midAltFilter.Connect(midTempFilter);// Connect midTempFilter input port to midAltFilter output port
+		midTempFilter.Connect(srcFilter);// Connect srcFilter intput port to midTempFilter output port
 
 		/****************************************************************************
-		* Here we start the filters up. All-in-all,... its really kind of boring.
+		* Here we start the filters up. Great work!
 		****************************************************************************/
 
-		Filter1.start();
-		Filter2.start();
-		Filter3.start();
-		Filter4.start();
+		srcFilter.start();
+		midTempFilter.start();
+		midAltFilter.start();
+		sinkFilter.start();
 
    } // main
 
