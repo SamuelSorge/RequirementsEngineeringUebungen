@@ -1,10 +1,11 @@
 /******************************************************************************************************************
 * File:SinkFilter.java
-* Course: 17655
+* Course: Requirements Engineering und Software-Architektur
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
 *	1.0 November 2008 - Sample Pipe and Filter code (ajl).
+*	2.0 November 2014 - Extension to write temperature/altitude to output file
 *
 * Description:
 *
@@ -30,14 +31,7 @@ public class SinkFilter extends FilterFramework
 {
 	public void run()
     {
-		/************************************************************************************
-		*	TimeStamp is used to compute time using java.util's Calendar class.
-		* 	TimeStampFormat is used to format the time value so that it can be easily printed
-		*	to the terminal.
-		*************************************************************************************/
-
-		
-
+	
 		int MeasurementLength = 8;		// This is the length of all measurements (including time) in bytes
 		int IdLength = 4;				// This is the length of IDs in the byte stream
 
@@ -54,6 +48,7 @@ public class SinkFilter extends FilterFramework
 
 		System.out.print( "\n" + this.getName() + "::Sink Reading ");
 
+		// struct to store output data
 		DataStruct dataSet = null;
 		
 		while (true)
@@ -111,7 +106,12 @@ public class SinkFilter extends FilterFramework
 					bytesread++;									// Increment the byte count
 
 				} // if
-				
+	
+				/************************************************************************************
+				*	TimeStamp is used to compute time using java.util's Calendar class.
+				* 	TimeStampFormat is used to format the time value so that it can be easily printed
+				*	to the terminal.
+				*************************************************************************************/	
 
 				Calendar TimeStamp = Calendar.getInstance();
 				SimpleDateFormat TimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss:SSS");
@@ -129,7 +129,7 @@ public class SinkFilter extends FilterFramework
 
 				
 				
-				
+				// timestamp arrives
 				if ( id == 0 )
 				{
 					if(dataSet != null){
@@ -139,44 +139,54 @@ public class SinkFilter extends FilterFramework
 					dataSet.Time = new Long(measurement);
 
 				} // if
-
+				
+				//velocity
 				if ( id == 1 )
 				{
 					if(dataSet != null){
 						dataSet.Velocity = new Long(measurement);
 					}
 				} // if
+				
+				// altitude
 				if ( id == 2 )
 				{
 					if(dataSet != null){
 						dataSet.Altitude = new Long(measurement);
 					}
 				} // if
+
+				// pressure
 				if ( id == 3 )
 				{
 					if(dataSet != null){
 						dataSet.Pressure = new Long(measurement);
 					}
 				} // if
+				
+				// temperature
 				if ( id == 4 )
 				{
 					if(dataSet != null){
 						dataSet.Temp = new Long(measurement);
 					}
 				} // if
+				
+				// attitude
 				if ( id == 5 )
 				{
 					if(dataSet != null){
 						dataSet.Attitude = new Long(measurement);
 					}
 				} // if
+				
+				// pressure wildpoint
 				if ( id == 6 )
 				{
 					if(dataSet != null){
 						dataSet.WildPressure = new Long(measurement);
 					}
 				} // if
-
 			} // try
 
 			/*******************************************************************************
@@ -203,9 +213,9 @@ public class SinkFilter extends FilterFramework
 		
 	}
 	
-	
+	//overridden
 	public void  processValueSet(DataStruct data){
 		
 	}
 
-} // SingFilter
+} // SinkFilter

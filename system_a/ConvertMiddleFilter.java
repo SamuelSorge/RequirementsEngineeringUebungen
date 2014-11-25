@@ -1,15 +1,19 @@
 /******************************************************************************************************************
-* File:MiddleFilter.java
-* Course: 17655
+* File: ConvertMiddleFilter.java
+* @author Team Bud Spencer
+* Course: Requirements Engineering und Software-Architektur
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
+<<<<<<< HEAD
 *   1.0 November 2008 - Sample Pipe and Filter code (ajl).
+=======
+*	1.0 November 2008 - ConvertMiddleFilter.
+>>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
 *
 * Description:
 *
-* This class serves as an example for how to use the FilterRemplate to create a standard filter. This particular
-* example is a simple "pass-through" filter that reads data from the filter's input port and writes data out the
+* This class serves as middle filter to convert data, reads data from the filter's input port and writes data out the
 * filter's output port.
 *
 * Parameters:       None
@@ -18,10 +22,23 @@
 *
 ******************************************************************************************************************/
 
+<<<<<<< HEAD
 abstract public class ConvertMiddleFilter extends FilterFramework {
     public void run() {
         int MeasurementLength = 8;      // This is the length of all measurements (including time) in bytes
         int IdLength = 4;               // This is the length of IDs in the byte stream
+=======
+abstract public class ConvertMiddleFilter extends FilterFramework
+{
+	public void run()
+    {
+		int MeasurementLength = 8;		// This is the length of all measurements (including time) in bytes
+		int IdLength = 4;				// This is the length of IDs in the byte stream
+
+		byte databyte = 0;				// This is the data byte read from the stream
+		int bytesread = 0;				// This is the number of bytes read from the stream
+		int byteswritten = 0;			// Number of bytes written to the stream.
+>>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
 
         byte databyte = 0;              // This is the data byte read from the stream
         int bytesread = 0;              // This is the number of bytes read from the stream
@@ -89,9 +106,32 @@ abstract public class ConvertMiddleFilter extends FilterFramework {
                         // measurement
                     } // if
 
+<<<<<<< HEAD
                     bytesread++;                                    // Increment the byte count
 
                 } // if
+=======
+				} // for
+				// convert data regarding its id
+                 measurement = ConvertData(id,measurement); 
+				
+				// only write data if id matches temperature or altitude
+                if(!IgnoreData(id)) 
+                {
+                    for (i=IdLength-1; i>=0; i-- )
+                    {
+                        databyte = (byte)(id >> 8*i );
+                        WriteFilterOutputPort(databyte);
+                        byteswritten++;
+                    }
+                    for (i=MeasurementLength-1; i>=0 ; i-- )
+                    {
+                        databyte = (byte)( measurement >> 8*i & 0xFF);
+                        WriteFilterOutputPort(databyte);
+                        byteswritten++;
+                    }
+                }
+>>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
 
                 measurement = ConvertData(id, measurement);
                 measurement = ConvertConvertData(id, measurement);
@@ -120,9 +160,20 @@ abstract public class ConvertMiddleFilter extends FilterFramework {
 
         } // while
 
+<<<<<<< HEAD
     } // run
 
     long ConvertData(int id, long measurement) {
+=======
+	
+	/****************************************************************************
+	// The following functions should be overridden
+	// @see MiddleAltitudeFilter#ConvertData(int id, long measurement)
+	// @see MiddleTemperatureFilter#ConvertData(int id, long measurement)
+	*****************************************************************************/
+    long ConvertData(int id, long measurement)
+    {
+>>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
         return measurement;
     }
     boolean IgnoreData(int id) {
