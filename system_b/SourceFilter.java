@@ -24,7 +24,7 @@ public class SourceFilter extends FilterFramework {
 
         // Input data file
         // The input file must be in the same folder.
-        String fileName = "FlightData.dat"; .
+        String fileName = "FlightData.dat";
         int bytesread = 0;                  // Number of bytes read from the input file.
         int byteswritten = 0;               // Number of bytes written to the stream.
         DataInputStream in = null;          // File stream reference.
