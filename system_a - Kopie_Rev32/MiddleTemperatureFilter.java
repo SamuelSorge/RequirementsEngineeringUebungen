@@ -27,12 +27,12 @@ public class MiddleTemperatureFilter extends ConvertMiddleFilter
 	*
 	* @return the converted temperature data
 	****************************************************************************/
-    long ConvertConvertData(int id, long measurement)
+    long convertTemperature(int id, long measurement)
     {
         if(id == 4)
         {
             double temp = Double.longBitsToDouble(measurement);
-            measurement = Double.doubleToLongBits( (temp - 32)/1.8 );
+            measurement = Double.doubleToLongBits( (temp - 32) / 1.8 );
         }
         return measurement;
     }
