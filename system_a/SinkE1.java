@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
-public class SinkE1 extends SinkFilter{
+public class SinkE1 extends SinkFilter {
 	boolean firstWrite = true;
 	String fileName = "OutputA.dat";
 	public void processValueSet(DataStruct data) {

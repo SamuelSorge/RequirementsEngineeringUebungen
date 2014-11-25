@@ -8,11 +8,11 @@
 *
 * Description:
 *
-* This class serves as an example to illstrate how to use the PlumberTemplate to create a main thread that
-* instantiates and connects a set of filters. This example consists of three filters: a source, a middle filter
-* that acts as a pass-through filter (it does nothing to the data), and a sink filter which illustrates all kinds
-* of useful things that you can do with the input stream of data.
-*
+* This class serves as main thread that* instantiates and connects a set of filters. 
+* This system consists of five filters: a source which reads the source file, three middle filters
+* that convert data (Fahrenheit to Celsius and feet to meters) and sort wildpoints,
+* and a sink filter which generates an output file.
+
 * Parameters: 		None
 *
 * Internal Methods:	None
@@ -23,35 +23,55 @@ public class SystemB
    public static void main( String argv[])
    {
 		/****************************************************************************
-		* Here we instantiate three filters.
+		* Here we instantiate five filters.
 		****************************************************************************/
 
-		SourceFilter Filter1 = new SourceFilter();
-		MiddleTemperatureFilter Filter2 = new MiddleTemperatureFilter();
-		MiddleAltitudeFilter Filter3 = new MiddleAltitudeFilter();
-                MiddlePressureWildPoints Filter4 = new MiddlePressureWildPoints();
-		SinkFilter Filter5 = new SinkE2();
+		// srcFilter is a source filter which reads some input and writes it to its outport
+		SourceFilter srcFilter = new SourceFilter();
+
+		// midTempFilter is a middle filter which converts the altitude from feet to meters
+		MiddleTemperatureFilter midTempFilter = new MiddleTemperatureFilter();
+
+		// midAltitudeFilter is a middle filter which converts the temperature from Fahrenheit to Celsius
+		MiddleAltitudeFilter midAltitudeFilter = new MiddleAltitudeFilter();
+
+		// midPressureWildPointsFilter is a middle filter which checks if the value is correct or a wildpoint
+        MiddlePressureWildPoints midPressureWildPointsFilter = new MiddlePressureWildPoints();
+
+        // sinkFilter is a sink filter which generates an output file "OutputB.dat" that contains the converted data in a given format
+		SinkFilter sinkFilter = new SinkE2();
 
 		/****************************************************************************
-		* Here we connect the filters starting with the sink filter (Filter 1) which
-		* we connect to Filter2 the middle filter. Then we connect Filter2 to the
-		* source filter (Filter3).
+		* Here we connect the filters starting with the sink filter (sinkFilter), which
+		* we connect to the midPressureWildPointsFilter.
+		* The MiddlePressureWildPoints (midPressureWildPointsFilter) is responsible for detecting wildpoints.
+		* In the next step we connect the middle filter (midAltFilter), which is used to convert feet in meters.
+		* Then we connect middle filter (midAltitudeFilter) to midTempFilter which is 
+		* used to convert the temperature from Fahrenheit to Celsius.
+		* At last we connect midTempFilter to the source filter (srcFilter).
 		****************************************************************************/
 
-		Filter5.Connect(Filter4);
-		Filter4.Connect(Filter3);
-		Filter3.Connect(Filter2);
-		Filter2.Connect(Filter1); // This esstially says, "connect Filter2 intput port to Filter1 output port
+		// Connect midPressureWildPointsFilter input port to sinkFilter output port
+		sinkFilter.Connect(midPressureWildPointsFilter);
+
+		// Connect midAltitudeFilter input port to midPressureWildPointsFilter output port
+		midPressureWildPointsFilter.Connect(midAltitudeFilter);
+
+		// Connect midTempFilter input port to midAltitudeFilter output port
+		midAltitudeFilter.Connect(midTempFilter);
+
+		// Connect srcFilter intput port to midTempFilter output port
+		midTempFilter.Connect(srcFilter); 
 
 		/****************************************************************************
-		* Here we start the filters up. All-in-all,... its really kind of boring.
+		* Here we start the filters up.
 		****************************************************************************/
 
-		Filter1.start();
-		Filter2.start();
-		Filter3.start();
-		Filter4.start();
-		Filter5.start();
+		srcFilter.start();
+		midTempFilter.start();
+		midAltitudeFilter.start();
+		midPressureWildPointsFilter.start();
+		sinkFilter.start();
 
    } // main
 
