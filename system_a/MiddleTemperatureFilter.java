@@ -1,14 +1,15 @@
 /******************************************************************************************************************
 * File: MiddleTemperatureFilter.java
-* Course: 17655
+* @author Team Bud Spencer 
+* Course: Requirements Engineering und Software-Architektur
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
-*	1.0 November 2014 - SystemA.
+*	1.0 November 2014 - MiddleTemperatureFilter.
 *
 * Description:
 *
-* This class serves as middle filter to convert the temperature from Fahrenheit to Celsius.
+* This class serves as middle filter to convert the temperature from "Fahrenheit" to "Celsius".
 *
 * Parameters: none
 *

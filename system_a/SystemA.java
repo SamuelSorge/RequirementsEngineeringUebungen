@@ -1,6 +1,7 @@
 /******************************************************************************************************************
 * File: SystemA.java
-* Course: 17655
+* @author Team Bud Spencer
+* Course: Requirements Engineering und Software-Architektur
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
@@ -8,7 +9,7 @@
 *
 * Description:
 *
-* This class serves as main thread that* instantiates and connects a set of filters. 
+* This class serves as main thread that instantiates and connects a set of filters. 
 * This system consists of four filters: a source, two middle filters
 * that convert data, and a sink filter which generates an output file.
 *

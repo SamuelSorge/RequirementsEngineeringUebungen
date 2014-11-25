@@ -1,15 +1,15 @@
 /******************************************************************************************************************
-* File:MiddleFilter.java
-* Course: 17655
+* File: ConvertMiddleFilter.java
+* @author Team Bud Spencer
+* Course: Requirements Engineering und Software-Architektur
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
-*	1.0 November 2008 - Sample Pipe and Filter code (ajl).
+*	1.0 November 2008 - ConvertMiddleFilter.
 *
 * Description:
 *
-* This class serves as an example for how to use the FilterRemplate to create a standard filter. This particular
-* example is a simple "pass-through" filter that reads data from the filter's input port and writes data out the
+* This class serves as middle filter to convert data, reads data from the filter's input port and writes data out the
 * filter's output port.
 *
 * Parameters: 		None
@@ -27,7 +27,7 @@ abstract public class ConvertMiddleFilter extends FilterFramework
 
 		byte databyte = 0;				// This is the data byte read from the stream
 		int bytesread = 0;				// This is the number of bytes read from the stream
-		int byteswritten = 0;				// Number of bytes written to the stream.
+		int byteswritten = 0;			// Number of bytes written to the stream.
 
 		long measurement;				// This is the word used to store all measurements - conversions are illustrated.
 		int id;						// This is the measurement id
@@ -97,24 +97,26 @@ abstract public class ConvertMiddleFilter extends FilterFramework
 
 					bytesread++;									// Increment the byte count
 
-				} // if
-
-                                measurement = ConvertData(id,measurement);
-                                if(!IgnoreData(id))
-                                {
-                                    for (i=IdLength-1; i>=0; i-- )
-                                    {
-                                        databyte = (byte)(id >> 8*i );
-                                        WriteFilterOutputPort(databyte);
-                                        byteswritten++;
-                                    }
-                                    for (i=MeasurementLength-1; i>=0 ; i-- )
-                                    {
-                                        databyte = (byte)( measurement >> 8*i & 0xFF);
-                                        WriteFilterOutputPort(databyte);
-                                        byteswritten++;
-                                    }
-                                }
+				} // for
+				// convert data regarding its id
+                 measurement = ConvertData(id,measurement); 
+				
+				// only write data if id matches temperature or altitude
+                if(!IgnoreData(id)) 
+                {
+                    for (i=IdLength-1; i>=0; i-- )
+                    {
+                        databyte = (byte)(id >> 8*i );
+                        WriteFilterOutputPort(databyte);
+                        byteswritten++;
+                    }
+                    for (i=MeasurementLength-1; i>=0 ; i-- )
+                    {
+                        databyte = (byte)( measurement >> 8*i & 0xFF);
+                        WriteFilterOutputPort(databyte);
+                        byteswritten++;
+                    }
+                }
 
 			} // try
 
@@ -130,6 +132,12 @@ abstract public class ConvertMiddleFilter extends FilterFramework
 
    } // run
 
+	
+	/****************************************************************************
+	// The following functions should be overridden
+	// @see MiddleAltitudeFilter#ConvertData(int id, long measurement)
+	// @see MiddleTemperatureFilter#ConvertData(int id, long measurement)
+	*****************************************************************************/
     long ConvertData(int id, long measurement)
     {
         return measurement;
