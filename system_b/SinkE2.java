@@ -8,110 +8,153 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+/******************************************************************************************************************
+*
+* The SinkE2 filter extends the basic SinkFilter, which is proivded by the filter framework.
+* The SinkE2 filter is responsible for:
+*   1. To create the "OutputB.dat" and "WildPoints.dat".
+*   2. Format the data
+*   3. Write the formatted data in the generated files from step 1.
+*       (If the pressure value is correct the data will, the data will be written in the "OutputB.dat" file.
+*       In the other case the pressure value is a  wildpoint, it will be written in the "WildPoints.dat".)
+*
+******************************************************************************************************************/
+public class SinkE2 extends SinkFilter {
 
-public class SinkE2 extends SinkFilter{
-	boolean firstWriteOutputB = true;
-	boolean firstWriteWildPoints = true;
-	String fileName = "OutputB.dat";
-	String wildPointFileName = "WildPoints.dat";
-	
-	public void processValueSet(DataStruct data) {
-		
-		if(firstWriteOutputB){
-			File f = new File(fileName);
-			try {
-				if(f.exists())f.delete();
-				f.createNewFile();
-				firstWriteOutputB = false;
-			} catch (IOException e) {
-				System.out.print("Error while create output file.");
-			}
-		}
-		
-		
-		
-		String printString = "";
+    private boolean firstWriteOutputB = true;
+    private boolean firstWriteWildPoints = true;
+    private String outputBFileName = "OutputB.dat";
+    private String wildPointoutputBFileName = "WildPoints.dat";
 
-		Calendar TimeStamp = Calendar.getInstance();
-		SimpleDateFormat TimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
-		TimeStamp.setTimeInMillis(data.Time.longValue());
-		printString += TimeStampFormat.format(TimeStamp.getTime()) + "\t";
 
-		if(data.Temp != null){
-			DecimalFormatSymbols tempDecimalFormatSymbols = new DecimalFormatSymbols();
-			tempDecimalFormatSymbols.setDecimalSeparator('.');
-			DecimalFormat TempdecimalFormat = new DecimalFormat("+#,000.000;-#", tempDecimalFormatSymbols);
-			printString += TempdecimalFormat.format(Double.longBitsToDouble(data.Temp.longValue()));
-		}
-		printString += "\t";
-		
-		
-		if(data.Altitude != null){
-			DecimalFormatSymbols attitudeDecimalFormatSymbols = new DecimalFormatSymbols();
-			attitudeDecimalFormatSymbols.setDecimalSeparator('.');
-			DecimalFormat attitudeDecimalFormat = new DecimalFormat("000000.00000", attitudeDecimalFormatSymbols);
-			printString += attitudeDecimalFormat.format(Double.longBitsToDouble(data.Altitude.longValue()));
-		}
-		printString  += "\t";
-		
-		if(data.Pressure != null){
-			DecimalFormatSymbols pressureDecimalFormatSymbols = new DecimalFormatSymbols();
-			pressureDecimalFormatSymbols.setDecimalSeparator(':');
-			DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
-			printString += pressureDecimalFormat.format(Double.longBitsToDouble(data.Pressure.longValue()));
-			if(data.WildPressure != null){
-				printString += "*";
-			}
-		}
-		printString  += "\n";
-		
-		try {
-		    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
-		    out.println(printString);
-		    out.close();
-		} catch (IOException e) {
-			System.out.print("Error while create output file.");
-		}
-		
-		
-		if(data.WildPressure != null){
-			if(firstWriteWildPoints){
-				File f = new File(wildPointFileName);
-				try {
-					if(f.exists())f.delete();
-					f.createNewFile();
-					firstWriteWildPoints = false;
-				} catch (IOException e) {
-					System.out.print("Error while create output file.");
-				}
-			}
-			
-			String wildString = "";
-			
-			Calendar WildTimeStamp = Calendar.getInstance();
-			SimpleDateFormat WildTimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
-			WildTimeStamp.setTimeInMillis(data.Time.longValue());
-			wildString += WildTimeStampFormat.format(WildTimeStamp.getTime()) + "\t";
-			
-			
-			
-				DecimalFormatSymbols pressureDecimalFormatSymbols = new DecimalFormatSymbols();
-				pressureDecimalFormatSymbols.setDecimalSeparator(':');
-				DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
-				wildString += pressureDecimalFormat.format(Double.longBitsToDouble(data.WildPressure.longValue()));
-				
-				wildString  += "\n";
-				
-				try {
-				    PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(wildPointFileName, true)));
-				    out.println(wildString);
-				    out.close();
-				} catch (IOException e) {
-					System.out.print("Error while create output file.");
-				}
-		}
-		
-		
-	}
-	
+    /**
+    * The method "processValueSet" is responsible for formatting and
+    * and writting the data in the respective file.
+    *
+    * @param data which will be written in "OutputB.dat" or
+    * or in the "WildPoints.dat".
+    */
+    public void processValueSet(DataStruct data) {
+
+        // Create the new output file for "OutputB".
+        // If the file exists, the file will be deleted
+        // and a new File will be created.
+        if (firstWriteOutputB) {
+            File f = new File(outputBFileName);
+            try {
+                if (f.exists())f.delete();
+                f.createNewFile();
+                firstWriteOutputB = false;
+            } catch (IOException e) {
+                System.out.print("Error while create output file.");
+            }
+        }
+
+
+
+        String printString = "";
+
+        // Get the timestamp in the format yyyy MM dd::hh:mm:ss (e.g. 2014 01 14::07:04:11).
+        // The timestamp is written in the first column.
+        Calendar timeStamp = Calendar.getInstance();
+        SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
+        timeStamp.setTimeInMillis(data.Time.longValue());
+        printString += timeStampFormat.format(timeStamp.getTime()) + "\t";
+
+        // If the value of the temperature (in Celsius) isn't empty then,
+        // formats the temperature and add it to the output string.
+        if (data.Temp != null) {
+            DecimalFormatSymbols tempDecimalFormatSymbols = new DecimalFormatSymbols();
+            tempDecimalFormatSymbols.setDecimalSeparator('.');
+            DecimalFormat tempdecimalFormat = new DecimalFormat("+#,000.000;-#", tempDecimalFormatSymbols);
+            printString += tempdecimalFormat.format(Double.longBitsToDouble(data.Temp.longValue()));
+        }
+        printString += "\t";
+
+        // If the value of the altitude (in meters) isn't empty then,
+        // formats the altitude and add it to the output string.
+        if (data.Altitude != null) {
+            DecimalFormatSymbols attitudeDecimalFormatSymbols = new DecimalFormatSymbols();
+            attitudeDecimalFormatSymbols.setDecimalSeparator('.');
+            DecimalFormat attitudeDecimalFormat = new DecimalFormat("000000.00000", attitudeDecimalFormatSymbols);
+            printString += attitudeDecimalFormat.format(Double.longBitsToDouble(data.Altitude.longValue()));
+        }
+        printString  += "\t";
+
+        // If the value of the pressure isn't empty then,
+        // formats the pressure and add it to the output string.
+        if (data.Pressure != null) {
+            DecimalFormatSymbols pressureDecimalFormatSymbols = new DecimalFormatSymbols();
+            pressureDecimalFormatSymbols.setDecimalSeparator(':');
+            DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
+            printString += pressureDecimalFormat.format(Double.longBitsToDouble(data.Pressure.longValue()));
+            if (data.WildPressure != null) {
+                printString += "*";
+            }
+        }
+        printString  += "\n";
+
+        // Writes the whole string in the "OutputB.dat".
+        // First column     --> Date and time information
+        // Second column    --> The temperature in Celsius
+        // Third column     --> The altitude in meters
+        // Fouth column     --> The pressure in psi
+        try {
+            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputBFileName, true)));
+            out.println(printString);
+            out.close();
+        } catch (IOException e) {
+            System.out.print("Error while create output file.");
+        }
+
+        // If a wildpoint detected check if the file "WildPoints.dat" exists or not.
+        // If the file exists it will be deleted and create new.
+        if (data.WildPressure != null) {
+            if (firstWriteWildPoints) {
+                File f = new File(wildPointoutputBFileName);
+                try {
+                    if (f.exists())f.delete();
+                    f.createNewFile();
+                    firstWriteWildPoints = false;
+                } catch (IOException e) {
+                    System.out.print("Error while create output file.");
+                }
+            }
+
+            String wildString = "";
+
+            // Get the timestamp in the format yyyy MM dd::hh:mm:ss (e.g. 2014 01 14::07:04:11).
+            // The timestamp is written in the first column and add it to the output string.
+            Calendar WildtimeStamp = Calendar.getInstance();
+            SimpleDateFormat WildtimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
+            WildtimeStamp.setTimeInMillis(data.Time.longValue());
+            wildString += WildtimeStampFormat.format(WildtimeStamp.getTime()) + "\t";
+
+
+            // Formats the wildpoint pressure
+            // and add it to the output string.
+            DecimalFormatSymbols pressureDecimalFormatSymbols = new DecimalFormatSymbols();
+            pressureDecimalFormatSymbols.setDecimalSeparator(':');
+            DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
+            wildString += pressureDecimalFormat.format(Double.longBitsToDouble(data.WildPressure.longValue()));
+
+            wildString  += "\n";
+
+            // Writes the whole string in the "WildPoints.dat".
+            // First column     --> Date and time information
+            // Second column    --> The temperature in Celsius
+            // Third column     --> The altitude in meters
+            // Fouth column     --> The wildpoints in psi
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(wildPointoutputBFileName, true)));
+                out.println(wildString);
+                out.close();
+            } catch (IOException e) {
+                System.out.print("Error while create output file.");
+            }
+        }
+
+
+    }
+
 }
