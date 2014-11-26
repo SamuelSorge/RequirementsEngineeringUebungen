@@ -5,11 +5,7 @@
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
-<<<<<<< HEAD
-*   1.0 November 2008 - Sample Pipe and Filter code (ajl).
-=======
-*	1.0 November 2008 - ConvertMiddleFilter.
->>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
+*	1.0 November 2014 - ConvertMiddleFilter.
 *
 * Description:
 *
@@ -21,45 +17,32 @@
 * Internal Methods: None
 *
 ******************************************************************************************************************/
-
-<<<<<<< HEAD
-abstract public class ConvertMiddleFilter extends FilterFramework {
-    public void run() {
+abstract public class ConvertMiddleFilter extends FilterFramework 
+{
+    public void run() 
+	{
         int MeasurementLength = 8;      // This is the length of all measurements (including time) in bytes
         int IdLength = 4;               // This is the length of IDs in the byte stream
-=======
-abstract public class ConvertMiddleFilter extends FilterFramework
-{
-	public void run()
-    {
-		int MeasurementLength = 8;		// This is the length of all measurements (including time) in bytes
-		int IdLength = 4;				// This is the length of IDs in the byte stream
 
 		byte databyte = 0;				// This is the data byte read from the stream
 		int bytesread = 0;				// This is the number of bytes read from the stream
 		int byteswritten = 0;			// Number of bytes written to the stream.
->>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
-
-        byte databyte = 0;              // This is the data byte read from the stream
-        int bytesread = 0;              // This is the number of bytes read from the stream
-        int byteswritten = 0;               // Number of bytes written to the stream.
 
         long measurement;           // This is the word used to store all measurements - conversions are illustrated.
         int id;                     // This is the measurement id
         int i;                      // This is a loop counter
 
-
-
         // Next we write a message to the terminal to let the world know we are alive...
-
         System.out.print( "\n" + this.getName() + "::Middle Reading ");
 
-        while (true) {
+        while (true) 
+		{
             /*************************************************************
             *   Here we read a byte and write a byte
             *************************************************************/
 
-            try {
+            try 
+			{
                 /***************************************************************************
                 // We know that the first data coming to this filter is going to be an ID and
                 // that it is IdLength long. So we first decommutate the ID bytes.
@@ -72,10 +55,9 @@ abstract public class ConvertMiddleFilter extends FilterFramework
 
                     id = id | (databyte & 0xFF);        // We append the byte on to ID...
 
-                    if (i != IdLength - 1) {            // If this is not the last byte, then slide the
-                        // previously appended byte to the left by one byte
+                    if (i != IdLength - 1) 				// If this is not the last byte, then slide the previously appended byte to the left by one byte
+					{            
                         id = id << 8;                   // to make room for the next byte we append to the ID
-
                     } // if
 
                     bytesread++;                        // Increment the byte count
@@ -96,24 +78,22 @@ abstract public class ConvertMiddleFilter extends FilterFramework
 
                 measurement = 0;
 
-                for (i = 0; i < MeasurementLength; i++ ) {
+                for (i = 0; i < MeasurementLength; i++ ) 
+				{
                     databyte = ReadFilterInputPort();
                     measurement = measurement | (databyte & 0xFF);  // We append the byte on to measurement...
 
-                    if (i != MeasurementLength - 1) {               // If this is not the last byte, then slide the
-                        // previously appended byte to the left by one byte
+                    if (i != MeasurementLength - 1) // If this is not the last byte, then slide the previously appended byte to the left by one byte
+					{                                   
                         measurement = measurement << 8;             // to make room for the next byte we append to the
-                        // measurement
                     } // if
-
-<<<<<<< HEAD
+					
                     bytesread++;                                    // Increment the byte count
 
-                } // if
-=======
 				} // for
+				
 				// convert data regarding its id
-                 measurement = ConvertData(id,measurement); 
+                measurement = ConvertData(id,measurement); 
 				
 				// only write data if id matches temperature or altitude
                 if(!IgnoreData(id)) 
@@ -131,41 +111,17 @@ abstract public class ConvertMiddleFilter extends FilterFramework
                         byteswritten++;
                     }
                 }
->>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
-
-                measurement = ConvertData(id, measurement);
-                measurement = ConvertConvertData(id, measurement);
-                
-                if (!IgnoreData(id)) {
-                    for (i = IdLength - 1; i >= 0; i-- ) {
-                        databyte = (byte)(id >> 8 * i );
-                        WriteFilterOutputPort(databyte);
-                        byteswritten++;
-                    }
-                    for (i = MeasurementLength - 1; i >= 0 ; i-- ) {
-                        databyte = (byte)( measurement >> 8 * i & 0xFF);
-                        WriteFilterOutputPort(databyte);
-                        byteswritten++;
-                    }
-                }
-
-            } // try
-
-            catch (EndOfStreamException e) {
+			} // try
+			catch (EndOfStreamException e) 
+			{
                 ClosePorts();
                 System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
                 break;
 
             } // catch
-
         } // while
-
-<<<<<<< HEAD
     } // run
 
-    long ConvertData(int id, long measurement) {
-=======
-	
 	/****************************************************************************
 	// The following functions should be overridden
 	// @see MiddleAltitudeFilter#ConvertData(int id, long measurement)
@@ -173,15 +129,11 @@ abstract public class ConvertMiddleFilter extends FilterFramework
 	*****************************************************************************/
     long ConvertData(int id, long measurement)
     {
->>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
         return measurement;
     }
-    boolean IgnoreData(int id) {
+    boolean IgnoreData(int id) 
+	{
         return false;
-    }
-
-    long ConvertConvertData(int id, long measurement) {
-        return measurement;
     }
 
 } // MiddleFilter
