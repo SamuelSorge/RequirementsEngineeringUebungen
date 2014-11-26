@@ -5,11 +5,9 @@
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
 * Versions:
-<<<<<<< HEAD
 *   1.0 November 2014 - SystemA.
 =======
 *	1.0 November 2014 - MiddleTemperatureFilter.
->>>>>>> ef54f360924fa22b5fa69c20015bd0ac24672608
 *
 * Description:
 *
@@ -30,7 +28,7 @@ public class MiddleTemperatureFilter extends ConvertMiddleFilter {
     *
     * @return the converted temperature data
     ****************************************************************************/
-    long ConvertConvertData(int id, long measurement) {
+    long ConvertData(int id, long measurement) {
         if (id == 4) {
             double temp = Double.longBitsToDouble(measurement);
             measurement = Double.doubleToLongBits( (temp - 32) / 1.8);
