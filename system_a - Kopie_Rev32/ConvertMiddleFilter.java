@@ -94,10 +94,7 @@ abstract public class ConvertMiddleFilter extends FilterFramework {
                 } // for
 
                 // convert data regarding its id
-                measurement = convertAltitude(id, measurement);
-
-                // convert data 
-                measurement = convertTemperature(id, measurement);
+                measurement = convertData(id, measurement);
 
                 // only write data if id matches temperature or altitude
                 if (!IgnoreData(id)) {
@@ -132,15 +129,11 @@ abstract public class ConvertMiddleFilter extends FilterFramework {
     // @see MiddleAltitudeFilter#ConvertData(int id, long measurement)
     // @see MiddleTemperatureFilter#ConvertData(int id, long measurement)
     *****************************************************************************/
-    long convertAltitude(int id, long measurement) {
+    long convertData(int id, long measurement) {
         return measurement;
     }
     boolean IgnoreData(int id) {
         return false;
-    }
-
-    long convertTemperature(int id, long measurement) {
-    	return measurement;
     }
 
 } // MiddleFilter

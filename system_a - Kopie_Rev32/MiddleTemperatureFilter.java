@@ -27,7 +27,7 @@ public class MiddleTemperatureFilter extends ConvertMiddleFilter
 	*
 	* @return the converted temperature data
 	****************************************************************************/
-    long convertTemperature(int id, long measurement)
+    long convertData(int id, long measurement)
     {
         if(id == 4)
         {

@@ -28,7 +28,7 @@ public class MiddleAltitudeFilter extends ConvertMiddleFilter
 	*
 	* @return the converted altitude data
 	****************************************************************************/
-    long convertAltitude(int id, long measurement)
+    long convertData(int id, long measurement)
     {
         if(id == 2)
         {
