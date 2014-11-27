@@ -140,8 +140,8 @@ public class MiddlePressureWildPoints extends FilterFramework {
                         // wild point
                         HashMap<Integer, Long> hm = myBuffer.remove(0);
                         Long lt = (Long)hm.get(3);
-                        hm.put(new Integer(6), (Long)Double.doubleToLongBits((last_valid_point + li) / 2));
-                        hm.put(new Integer(3), lt);
+                        hm.put(new Integer(3), (Long)Double.doubleToLongBits((last_valid_point + li) / 2));
+                        hm.put(new Integer(6), lt);
                         byteswritten += WriteMapToOutputPort(hm);
                     } else {
                         break;
@@ -160,8 +160,8 @@ public class MiddlePressureWildPoints extends FilterFramework {
                         // wild point
                         HashMap<Integer, Long> hm = myBuffer.remove(0);
                         Long lt = (Long)hm.get(3);
-                        hm.put(new Integer(3), (Long)Double.doubleToLongBits((l0 + last_valid_point) / 2));
-                        hm.put(new Integer(6), lt);
+                        hm.put(new Integer(6), (Long)Double.doubleToLongBits((l0 + last_valid_point) / 2));
+                        hm.put(new Integer(3), lt);
                         WriteMapToOutputPort(hm);
                     }
                     //System.out.println(myBuffer);
