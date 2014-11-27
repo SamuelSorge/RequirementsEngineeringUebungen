@@ -29,14 +29,14 @@ public class SystemA
 		// srcFilter is a source filter which reads some input and writes it to its outport
 		SourceFilter srcFilter = new SourceFilter();
 
+		// midIgnFilter is a middle filter which filters out unwanted data
+		MiddleIgnoreFilter midIgnFilter = new MiddleIgnoreFilter();
+
 		// midTempFilter is a middle filter which converts the altitude from feet to meters
 		MiddleTemperatureFilter midTempFilter = new MiddleTemperatureFilter();
 
 		// midAltFilter is a middle filter which converts the temperature from Fahrenheit to Celsius
 		MiddleAltitudeFilter midAltFilter = new MiddleAltitudeFilter();
-
-		// midIgnFilter is a middle filter which filters out unwanted data
-		MiddleIgnoreFilter midIgnFilter = new MiddleIgnoreFilter();
 
 		// sinkFilter is a sink filter which generates an output file "OutputA.dat" that contains the converted data in a given format
 		SinkFilter sinkFilter = new SinkE1();
@@ -48,26 +48,26 @@ public class SystemA
 		* At last we connect midTempFilter to the source filter (srcFilter).
 		****************************************************************************/
 
-		// Connect midAltFilter input port to midAltFilter output port
-		sinkFilter.Connect(midIgnFilter);
+		// Connect sinkFilter output port to midAltFilter input port
+		sinkFilter.Connect(midAltFilter);
 
-        // Connect midAltFilter input port to midIgnFilter output port
-        midIgnFilter.Connect(midAltFilter);
-
-		// Connect midTempFilter input port to midAltFilter output port
+		// Connect midTempFilter output port to midAltFilter input port
 		midAltFilter.Connect(midTempFilter);
 
-		// Connect srcFilter intput port to midTempFilter output port
-		midTempFilter.Connect(srcFilter);
+		// Connect midIgnFilter intput port to midTempFilter input port
+		midTempFilter.Connect(midIgnFilter);
+
+		// Connect srcFilter output port to midIgnFilter input port
+		midIgnFilter.Connect(srcFilter);
 
 		/****************************************************************************
 		* Here we start the filters up. Great work!
 		****************************************************************************/
 
 		srcFilter.start();
+		midIgnFilter.start();
 		midTempFilter.start();
 		midAltFilter.start();
-        midIgnFilter.start();
 		sinkFilter.start();
 
    } // main
