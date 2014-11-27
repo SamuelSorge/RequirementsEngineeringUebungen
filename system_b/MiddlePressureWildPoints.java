@@ -33,172 +33,202 @@ public class MiddlePressureWildPoints extends FilterFramework {
     static int IdLength = 4;
 
     public void run() {
-        byte databyte = 0;      // This is the data byte read from the stream
-        int bytesread = 0;      // This is the number of bytes read from the stream
-        int byteswritten = 0;   // Number of bytes written to the stream.
+		byte databyte = 0;      // This is the data byte read from the stream
+		int bytesread = 0;      // This is the number of bytes read from the stream
+		int byteswritten = 0;   // Number of bytes written to the stream.
 
-        long measurement;           // This is the word used to store all measurements - conversions are illustrated.
-        int id;                     // This is the measurement id
-        int i;                      // This is a loop counter
-        double last_valid_point = 0.0;
+		long measurement;		   // This is the word used to store all measurements - conversions are illustrated.
+		int id;				     // This is the measurement id
+		int i;				      // This is a loop counter
+		double last_valid_point = 0.0;
 
-        //
-        List<HashMap<Integer, Long>> myBuffer = new ArrayList<HashMap<Integer, Long>>();
-        HashMap<Integer, Long> myCurrentFrame = null;
-
-
-        // Next we write a message to the terminal to let the world know we are alive...
-
-        System.out.print( "\n" + this.getName() + "::Middle Reading ");
-
-        while (true) {
-            /*************************************************************
-            *   Here we read a byte and write a byte
-            *************************************************************/
-
-            try {
-                /***************************************************************************
-                // We know that the first data coming to this filter is going to be an ID and
-                // that it is IdLength long. So we first decommutate the ID bytes.
-                ****************************************************************************/
-
-                id = 0;
-
-                for (i = 0; i < IdLength; i++ ) {
-                    databyte = ReadFilterInputPort();   // This is where we read the byte from the stream...
-
-                    id = id | (databyte & 0xFF);        // We append the byte on to ID...
-
-                    if (i != IdLength - 1) {            // If this is not the last byte, then slide the
-                        // previously appended byte to the left by one byte
-                        id = id << 8;                   // to make room for the next byte we append to the ID
-
-                    } // if
-
-                    bytesread++;                        // Increment the byte count
-
-                } // for
-
-                /****************************************************************************
-                // Here we read measurements. All measurement data is read as a stream of bytes
-                // and stored as a long value. This permits us to do bitwise manipulation that
-                // is neccesary to convert the byte stream into data words. Note that bitwise
-                // manipulation is not permitted on any kind of floating point types in Java.
-                // If the id = 0 then this is a time value and is therefore a long value - no
-                // problem. However, if the id is something other than 0, then the bits in the
-                // long value is really of type double and we need to convert the value using
-                // Double.longBitsToDouble(long val) to do the conversion which is illustrated.
-                // below.
-                *****************************************************************************/
-
-                measurement = 0;
-
-                for (i = 0; i < MeasurementLength; i++ ) {
-                    databyte = ReadFilterInputPort();
-                    measurement = measurement | (databyte & 0xFF);  // We append the byte on to measurement...
-
-                    if (i != MeasurementLength - 1) {               // If this is not the last byte, then slide the
-                        // previously appended byte to the left by one byte
-                        measurement = measurement << 8;             // to make room for the next byte we append to the
-                        // measurement
-                    } // if
-
-                    bytesread++;                                    // Increment the byte count
-
-                } // if
-
-                // time so a new frame starts
-                if (id == 0) {
-                    if (myCurrentFrame != null) {
-                        myBuffer.add(myCurrentFrame);
-                    }
-                    //     System.out.println(myBuffer);
-                    myCurrentFrame = new HashMap<Integer, Long>();
-                }
-                myCurrentFrame.put(id, measurement);
+		//
+		List<HashMap<Integer, Long>> myBuffer = new ArrayList<HashMap<Integer, Long>>();
+		HashMap<Integer, Long> myCurrentFrame = null;
 
 
-                while (myBuffer.size() > 1) {
-                    double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
-                    double l1 = Double.longBitsToDouble((Long)myBuffer.get(1).get(3));
-                    // check if point is valid point (not wild)
-                    if (Math.abs(l0 - l1) <= 10 && l0 > 0 && l1 > 0) {
-                        byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
-                        last_valid_point = l0;
-                    }else{
-                        break;
-                    }
-                }
-                while(myBuffer.size() > 1 && last_valid_point > 0)
-                {
-                    double li = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
-                    if (Math.abs(last_valid_point - li) <= 10 && li > 0) {
-                        // valid point
-                        byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
-                        last_valid_point = li;
-                    } else if (Math.abs(last_valid_point- li) > 10 || li < 0) {
-                        // wild point
-                        HashMap<Integer, Long> hm = myBuffer.remove(0);
-                        Long lt = (Long)hm.get(3);
-                        hm.put(new Integer(3), (Long)Double.doubleToLongBits((last_valid_point + li) / 2));
-                        hm.put(new Integer(6), lt);
-                        byteswritten += WriteMapToOutputPort(hm);
-                    } else {
-                        break;
-                    }
-                }
-            } // try
+		// Next we write a message to the terminal to let the world know we are alive...
 
-            catch (EndOfStreamException e) {
-                // check all remaining items
-                for (i = 0 ; i < myBuffer.size() ; i++) {
-                    double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
-                    // valid point
-                    if (Math.abs(l0 - last_valid_point) <= 10 && l0 > 0) {
-                        WriteMapToOutputPort(myBuffer.remove(0));
-                    } else {
-                        // wild point
-                        HashMap<Integer, Long> hm = myBuffer.remove(0);
-                        Long lt = (Long)hm.get(3);
-                        hm.put(new Integer(6), (Long)Double.doubleToLongBits((l0 + last_valid_point) / 2));
-                        hm.put(new Integer(3), lt);
-                        WriteMapToOutputPort(hm);
-                    }
-                    //System.out.println(myBuffer);
-                }
-                System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
-                ClosePorts();
-                break;
-            } // catch
+		System.out.print( "\n" + this.getName() + "::Middle Reading ");
 
-        } // while
+		while (true) {
+		    /*************************************************************
+		    *   Here we read a byte and write a byte
+		    *************************************************************/
+
+		    try {
+				/***************************************************************************
+				// We know that the first data coming to this filter is going to be an ID and
+				// that it is IdLength long. So we first decommutate the ID bytes.
+				****************************************************************************/
+
+				id = 0;
+
+				for (i = 0; i < IdLength; i++ ) {
+				    databyte = ReadFilterInputPort();   // This is where we read the byte from the stream...
+
+				    id = id | (databyte & 0xFF);		// We append the byte on to ID...
+
+				    if (i != IdLength - 1) {		    // If this is not the last byte, then slide the
+						// previously appended byte to the left by one byte
+						id = id << 8;                   // to make room for the next byte we append to the ID
+
+				    } // if
+
+				    bytesread++;		                // Increment the byte count
+
+				} // for
+
+				/****************************************************************************
+				// Here we read measurements. All measurement data is read as a stream of bytes
+				// and stored as a long value. This permits us to do bitwise manipulation that
+				// is neccesary to convert the byte stream into data words. Note that bitwise
+				// manipulation is not permitted on any kind of floating point types in Java.
+				// If the id = 0 then this is a time value and is therefore a long value - no
+				// problem. However, if the id is something other than 0, then the bits in the
+				// long value is really of type double and we need to convert the value using
+				// Double.longBitsToDouble(long val) to do the conversion which is illustrated.
+				// below.
+				*****************************************************************************/
+
+				measurement = 0;
+
+				for (i = 0; i < MeasurementLength; i++ ) {
+				    databyte = ReadFilterInputPort();
+				    measurement = measurement | (databyte & 0xFF);  // We append the byte on to measurement...
+
+				    if (i != MeasurementLength - 1) {		       // If this is not the last byte, then slide the
+						// previously appended byte to the left by one byte
+						measurement = measurement << 8;             // to make room for the next byte we append to the
+						// measurement
+				    } // if
+
+				    bytesread++;		                            // Increment the byte count
+
+				} // if
+
+				// time so a new frame starts
+				if (id == 0) {
+				    if (myCurrentFrame != null) {
+						myBuffer.add(myCurrentFrame);
+				    }
+				    //     System.out.println(myBuffer);
+				    myCurrentFrame = new HashMap<Integer, Long>();
+				}
+				myCurrentFrame.put(id, measurement);
+
+
+				while (myBuffer.size() > 1) {
+				    double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
+				    double l1 = Double.longBitsToDouble((Long)myBuffer.get(1).get(3));
+				    // check if point is valid point (not wild)
+				    if (Math.abs(l0 - l1) <= 10 && l0 > 0 && l1 > 0) {
+						byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
+						last_valid_point = l0;
+				    }else{
+						break;
+				    }
+				}
+				while(myBuffer.size() > 1 && last_valid_point > 0)
+				{
+				    double li = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
+				    if (Math.abs(last_valid_point - li) <= 10 && li > 0) {
+						// valid point
+						byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
+						last_valid_point = li;
+				    }
+				    else
+				    {
+						break;
+				    }
+				}
+
+				if(myBuffer.size() > 2)
+				{
+				    //if first is not valid search vor next valid point
+				    boolean found_valid = false;
+				    HashMap<Integer, Long> hm_valid = new HashMap<Integer, Long>();// need init, just because java sucks
+				    int j;
+				    for(j = 0 ; j < myBuffer.size() && !found_valid ; j++)
+				    {
+						double lj = Double.longBitsToDouble((Long)myBuffer.get(j).get(3));
+						if (Math.abs(last_valid_point - lj) <= 10 && lj > 0) {
+						    found_valid = true;
+						    hm_valid = myBuffer.remove(j);
+						}
+				    }
+				    // there is an valid point in the queue, so all points inbetween are invalid
+				    if(found_valid)
+				    {
+						double lv = Double.longBitsToDouble((Long)hm_valid.get(3));
+						// calculate the avg for each invalid point
+						for(i = 0 ; i < j-1 ; i++)
+						{
+						    // wild point
+						    HashMap<Integer, Long> hm = myBuffer.remove(0);
+						    Long lt = (Long)hm.get(3);
+						    hm.put(new Integer(3), (Long)Double.doubleToLongBits((last_valid_point + lv) / 2));
+						    System.out.println("Wild: " + Double.longBitsToDouble(lt) + " | Norm: " + (last_valid_point + lv) / 2 + " valid: " + last_valid_point);
+						    hm.put(new Integer(6), lt);
+						    byteswritten += WriteMapToOutputPort(hm);
+						}
+						// send out the valid point
+						byteswritten += WriteMapToOutputPort(hm_valid);
+						last_valid_point = lv;
+				    }
+				}
+		    } // try
+
+		    catch (EndOfStreamException e) {
+				// check all remaining items
+				for (i = 0 ; i < myBuffer.size() ; i++) {
+				    double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
+				    // valid point
+				    if (Math.abs(l0 - last_valid_point) <= 10 && l0 > 0) {
+						WriteMapToOutputPort(myBuffer.remove(0));
+				    } else {
+						// wild point
+						HashMap<Integer, Long> hm = myBuffer.remove(0);
+						Long lt = (Long)hm.get(3);
+						hm.put(new Integer(3), (Long)Double.doubleToLongBits((l0 + last_valid_point) / 2));
+						hm.put(new Integer(6), lt);
+						WriteMapToOutputPort(hm);
+				    }
+				    //System.out.println(myBuffer);
+				}
+				System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
+				ClosePorts();
+				break;
+		    } // catch
+
+		} // while
 
     } // run
 
     int WriteMapToOutputPort(HashMap<Integer, Long> hm) {
-        byte databyte = 0;
-        int i;
-        int byteswritten = 0;
-        for (Map.Entry<Integer, Long> entry : hm.entrySet()) {
-            for (i = IdLength - 1; i >= 0; i-- ) {
-                databyte = (byte)(entry.getKey() >> 8 * i );
-                WriteFilterOutputPort(databyte);
-                byteswritten++;
-            }
-            for (i = MeasurementLength - 1; i >= 0 ; i-- ) {
-                databyte = (byte)(entry.getValue() >> 8 * i & 0xFF);
-                WriteFilterOutputPort(databyte);
-                byteswritten++;
-            }
-        }
-        return byteswritten;
+		byte databyte = 0;
+		int i;
+		int byteswritten = 0;
+		for (Map.Entry<Integer, Long> entry : hm.entrySet()) {
+		    for (i = IdLength - 1; i >= 0; i-- ) {
+				databyte = (byte)(entry.getKey() >> 8 * i );
+				WriteFilterOutputPort(databyte);
+				byteswritten++;
+		    }
+		    for (i = MeasurementLength - 1; i >= 0 ; i-- ) {
+				databyte = (byte)(entry.getValue() >> 8 * i & 0xFF);
+				WriteFilterOutputPort(databyte);
+				byteswritten++;
+		    }
+		}
+		return byteswritten;
     }
 
     long ConvertData(int id, long measurement) {
-        return measurement;
+		return measurement;
     }
     boolean IgnoreData(int id) {
-        return false;
+		return false;
     }
 
 } // MiddleFilter
