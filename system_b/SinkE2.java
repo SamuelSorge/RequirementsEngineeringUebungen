@@ -57,12 +57,12 @@ public class SinkE2 extends SinkFilter {
 
         String printString = "";
 
-        // Get the timestamp in the format yyyy MM dd::hh:mm:ss (e.g. 2014 01 14::07:04:11).
+        // Get the timestamp in the format yyyy:dd::hh:mm:ss (e.g. 2014:14:07:04:11).
         // The timestamp is written in the first column.
         Calendar timeStamp = Calendar.getInstance();
-        SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
+        SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyy:dd:hh:mm:ss");
         timeStamp.setTimeInMillis(data.Time.longValue());
-        printString += timeStampFormat.format(timeStamp.getTime()) + "\t\t";
+        printString += timeStampFormat.format(timeStamp.getTime()) + "\t\t\t";
 
         // If the value of the temperature (in Celsius) isn't empty then,
         // formats the temperature and add it to the output string.
@@ -118,12 +118,12 @@ public class SinkE2 extends SinkFilter {
 
             String wildString = "";
 
-            // Get the timestamp in the format yyyy MM dd::hh:mm:ss (e.g. 2014 01 14::07:04:11).
+            // Get the timestamp in the format yyyy:dd:hh:mm:ss (e.g. 2014:14::07:04:11).
             // The timestamp is written in the first column and add it to the output string.
             Calendar WildtimeStamp = Calendar.getInstance();
-            SimpleDateFormat WildtimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
+            SimpleDateFormat WildtimeStampFormat = new SimpleDateFormat("yyyy:dd:hh:mm:ss");
             WildtimeStamp.setTimeInMillis(data.Time.longValue());
-            wildString += WildtimeStampFormat.format(WildtimeStamp.getTime()) + "\t\t";
+            wildString += WildtimeStampFormat.format(WildtimeStamp.getTime()) + "\t\t\t";
 
 
             // Formats the wildpoint pressure
