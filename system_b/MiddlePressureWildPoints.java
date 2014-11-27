@@ -27,10 +27,10 @@ import java.util.Iterator;
 public class MiddlePressureWildPoints extends FilterFramework {
 
     // This is the length of all measurements (including time) in bytes
-    static int MeasurementLength = 8;       
+    static int MeasurementLength = 8;
 
     // This is the length of IDs in the byte stream
-    static int IdLength = 4;                
+    static int IdLength = 4;
 
     public void run() {
         byte databyte = 0;      // This is the data byte read from the stream
@@ -42,7 +42,7 @@ public class MiddlePressureWildPoints extends FilterFramework {
         int i;                      // This is a loop counter
         double last_valid_point = 0.0;
 
-        // 
+        //
         List<HashMap<Integer, Long>> myBuffer = new ArrayList<HashMap<Integer, Long>>();
         HashMap<Integer, Long> myCurrentFrame = null;
 
@@ -121,53 +121,52 @@ public class MiddlePressureWildPoints extends FilterFramework {
                 while (myBuffer.size() > 1) {
                     double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
                     double l1 = Double.longBitsToDouble((Long)myBuffer.get(1).get(3));
-                    // whild point
+                    // check if point is valid point (not wild)
                     if (Math.abs(l0 - l1) <= 10 && l0 > 0 && l1 > 0) {
                         byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
                         last_valid_point = l0;
+                    }else{
+                        break;
+                    }
+                }
+                while(myBuffer.size() > 1 && last_valid_point > 0)
+                {
+                    double li = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
+                    if (Math.abs(last_valid_point - li) <= 10 && li > 0) {
+                        // valid point
+                        byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
+                        last_valid_point = li;
+                    } else if (Math.abs(last_valid_point- li) > 10 || li < 0) {
+                        // wild point
+                        HashMap<Integer, Long> hm = myBuffer.remove(0);
+                        Long lt = (Long)hm.get(3);
+                        hm.put(new Integer(6), (Long)Double.doubleToLongBits((last_valid_point + li) / 2));
+                        hm.put(new Integer(3), lt);
+                        byteswritten += WriteMapToOutputPort(hm);
                     } else {
                         break;
                     }
                 }
-                // TODO FIXME please fix my brainfuck
-                if (myBuffer.size() > 2) {
-                    double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
-                    System.out.println("WildPoint found: " + l0 + " | " + Double.longBitsToDouble(myBuffer.get(myBuffer.size() - 1).get(3)) + " / " + Double.longBitsToDouble(myBuffer.get(1).get(3)));
-                    for (i = 0; i < myBuffer.size() ; i++) {
-                        double li = Double.longBitsToDouble((Long)myBuffer.get(i).get(3));
-                        if (Math.abs(l0 - li) <= 10 && l0 > 0 && li > 0) {
-                            // valid point found at 0 and i, between all points are 'wild' and will be set to avg(l0,li)
-                            byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
-                            for (int j = 0 ; j < i ; j++) {
-                                HashMap<Integer, Long> hm = myBuffer.remove(0); // bevor it was at position 1
-                                Long lt = (Long)hm.get(3);
-                                hm.put(new Integer(3), (Long)Double.doubleToLongBits((l0 + li) / 2));
-                                hm.put(new Integer(6), lt);
-                                byteswritten += WriteMapToOutputPort(hm);
-                            }
-                            last_valid_point = li;
-                        }
-                    }
-                }
-
             } // try
 
             catch (EndOfStreamException e) {
-                System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
+                // check all remaining items
                 for (i = 0 ; i < myBuffer.size() ; i++) {
                     double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
-                    // whild point
+                    // valid point
                     if (Math.abs(l0 - last_valid_point) <= 10 && l0 > 0) {
                         WriteMapToOutputPort(myBuffer.remove(0));
                     } else {
-                        HashMap<Integer, Long> hm = myBuffer.remove(0); // bevor it was at position 1
+                        // wild point
+                        HashMap<Integer, Long> hm = myBuffer.remove(0);
                         Long lt = (Long)hm.get(3);
                         hm.put(new Integer(3), (Long)Double.doubleToLongBits((l0 + last_valid_point) / 2));
                         hm.put(new Integer(6), lt);
                         WriteMapToOutputPort(hm);
                     }
-                    System.out.println(myBuffer);
+                    //System.out.println(myBuffer);
                 }
+                System.out.print( "\n" + this.getName() + "::Middle Exiting; bytes read: " + bytesread + " bytes written: " + byteswritten );
                 ClosePorts();
                 break;
             } // catch
@@ -181,6 +180,9 @@ public class MiddlePressureWildPoints extends FilterFramework {
         int i;
         int byteswritten = 0;
         for (Map.Entry<Integer, Long> entry : hm.entrySet()) {
+            if(entry.getKey() == 3 || entry.getKey() == 6)
+            else if(entry.getKey() == 0)
+
             for (i = IdLength - 1; i >= 0; i-- ) {
                 databyte = (byte)(entry.getKey() >> 8 * i );
                 WriteFilterOutputPort(databyte);
