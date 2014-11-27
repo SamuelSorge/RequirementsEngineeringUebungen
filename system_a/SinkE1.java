@@ -59,10 +59,10 @@ public class SinkE1 extends SinkFilter {
 
         String printString = "";
 
-        // Get the timestamp in the format yyyy MM dd:hh:mm:ss (e.g. 2014 01 14:07:04:11).
+        // Get the timestamp in the format yyyy:dd:hh:mm:ss (e.g. 2014:14:07:04:11).
         // The timestamp is written in the first column.
         Calendar TimeStamp = Calendar.getInstance();
-        SimpleDateFormat TimeStampFormat = new SimpleDateFormat("yyyy MM dd:hh:mm:ss");
+        SimpleDateFormat TimeStampFormat = new SimpleDateFormat("yyyy:dd:hh:mm:ss");
         TimeStamp.setTimeInMillis(data.Time.longValue());
         printString += TimeStampFormat.format(TimeStamp.getTime()) + "\t\t\t";
 
