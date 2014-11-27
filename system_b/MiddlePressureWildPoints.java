@@ -180,9 +180,6 @@ public class MiddlePressureWildPoints extends FilterFramework {
         int i;
         int byteswritten = 0;
         for (Map.Entry<Integer, Long> entry : hm.entrySet()) {
-            if(entry.getKey() == 3 || entry.getKey() == 6)
-            else if(entry.getKey() == 0)
-
             for (i = IdLength - 1; i >= 0; i-- ) {
                 databyte = (byte)(entry.getKey() >> 8 * i );
                 WriteFilterOutputPort(databyte);
