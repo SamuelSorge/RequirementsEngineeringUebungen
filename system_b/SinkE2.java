@@ -45,6 +45,9 @@ public class SinkE2 extends SinkFilter {
                 if (f.exists())f.delete();
                 f.createNewFile();
                 firstWriteOutputB = false;
+                String header = "Time: \t\t\t\t\t\t" + "Temperature (C): \t\t" + "Altitude (m):\t\t\t" + "Pressure (psi)\n" +
+                                "________________________________________________________________________________________________";
+                writeData(outputBFileName, header);
             } catch (IOException e) {
                 System.out.print("Error while create output file.");
             }
@@ -59,17 +62,17 @@ public class SinkE2 extends SinkFilter {
         Calendar timeStamp = Calendar.getInstance();
         SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
         timeStamp.setTimeInMillis(data.Time.longValue());
-        printString += timeStampFormat.format(timeStamp.getTime()) + "\t";
+        printString += timeStampFormat.format(timeStamp.getTime()) + "\t\t";
 
         // If the value of the temperature (in Celsius) isn't empty then,
         // formats the temperature and add it to the output string.
         if (data.Temp != null) {
             DecimalFormatSymbols tempDecimalFormatSymbols = new DecimalFormatSymbols();
             tempDecimalFormatSymbols.setDecimalSeparator('.');
-            DecimalFormat tempdecimalFormat = new DecimalFormat("+#,000.000;-#", tempDecimalFormatSymbols);
+            DecimalFormat tempdecimalFormat = new DecimalFormat("+#,000.00000;-#", tempDecimalFormatSymbols);
             printString += tempdecimalFormat.format(Double.longBitsToDouble(data.Temp.longValue()));
         }
-        printString += "\t";
+        printString += "\t\t\t\t";
 
         // If the value of the altitude (in meters) isn't empty then,
         // formats the altitude and add it to the output string.
@@ -79,7 +82,7 @@ public class SinkE2 extends SinkFilter {
             DecimalFormat attitudeDecimalFormat = new DecimalFormat("000000.00000", attitudeDecimalFormatSymbols);
             printString += attitudeDecimalFormat.format(Double.longBitsToDouble(data.Altitude.longValue()));
         }
-        printString  += "\t";
+        printString  += "\t\t\t";
 
         // If the value of the pressure isn't empty then,
         // formats the pressure and add it to the output string.
@@ -92,20 +95,9 @@ public class SinkE2 extends SinkFilter {
                 printString += "*";
             }
         }
-        printString  += "\n";
+        // Write data in outputBFileName
+        writeData (outputBFileName, printString);
 
-        // Writes the whole string in the "OutputB.dat".
-        // First column     --> Date and time information
-        // Second column    --> The temperature in Celsius
-        // Third column     --> The altitude in meters
-        // Fouth column     --> The pressure in psi
-        try {
-            PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outputBFileName, true)));
-            out.println(printString);
-            out.close();
-        } catch (IOException e) {
-            System.out.print("Error while create output file.");
-        }
 
         // If a wildpoint detected check if the file "WildPoints.dat" exists or not.
         // If the file exists it will be deleted and create new.
@@ -116,6 +108,9 @@ public class SinkE2 extends SinkFilter {
                     if (f.exists())f.delete();
                     f.createNewFile();
                     firstWriteWildPoints = false;
+                    String header = "Time: \t\t\t\t\t\t" + "Pressure (psi)\n" +
+                                    "___________________________________________";
+                    writeData(wildPointoutputBFileName, header);
                 } catch (IOException e) {
                     System.out.print("Error while create output file.");
                 }
@@ -128,7 +123,7 @@ public class SinkE2 extends SinkFilter {
             Calendar WildtimeStamp = Calendar.getInstance();
             SimpleDateFormat WildtimeStampFormat = new SimpleDateFormat("yyyy MM dd::hh:mm:ss");
             WildtimeStamp.setTimeInMillis(data.Time.longValue());
-            wildString += WildtimeStampFormat.format(WildtimeStamp.getTime()) + "\t";
+            wildString += WildtimeStampFormat.format(WildtimeStamp.getTime()) + "\t\t";
 
 
             // Formats the wildpoint pressure
@@ -138,23 +133,32 @@ public class SinkE2 extends SinkFilter {
             DecimalFormat pressureDecimalFormat = new DecimalFormat("00.00000", pressureDecimalFormatSymbols);
             wildString += pressureDecimalFormat.format(Double.longBitsToDouble(data.WildPressure.longValue()));
 
-            wildString  += "\n";
+            // Write data in wildPointoutputBFileName (the wildpoints)
+            writeData(wildPointoutputBFileName, wildString);
 
-            // Writes the whole string in the "WildPoints.dat".
-            // First column     --> Date and time information
-            // Second column    --> The temperature in Celsius
-            // Third column     --> The altitude in meters
-            // Fouth column     --> The wildpoints in psi
-            try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(wildPointoutputBFileName, true)));
-                out.println(wildString);
-                out.close();
-            } catch (IOException e) {
-                System.out.print("Error while create output file.");
-            }
         }
+    }
 
+    // Writes the whole string in the "OutputB.dat" or in "Wildpoints.dat" depending on file name.
+    // Structure OUTPUTB.dat
+    // Header
+    // First column     --> Date and time information
+    // Second column    --> The temperature in Celsius
+    // Third column     --> The altitude in meters
+    //Fourth column     --> The pressure in psi
 
+    // Structure WILDPOINTS.dat
+    // Header
+    // First column     --> Date and time information
+    // Second column    --> The pressure in psi
+    public void writeData(String fileName, String dataToWrite) {
+        try {
+            PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
+            writer.println(dataToWrite);
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Error while writing in " + fileName + " --> " + e.getMessage());
+        }
     }
 
 }
