@@ -39,7 +39,7 @@ public class MiddlePressureWildPoints extends FilterFramework {
 
 		long measurement;		   // This is the word used to store all measurements - conversions are illustrated.
 		int id;				     // This is the measurement id
-		int i;				      // This is a loop counter
+		int i,j;				      // This is a loop counter
 		double last_valid_point = 0.0;
 
 		//
@@ -117,6 +117,45 @@ public class MiddlePressureWildPoints extends FilterFramework {
 				}
 				myCurrentFrame.put(id, measurement);
 
+                // check if we find a matching value pair if we did not find any valid point yet
+                for(i = 0 ; i < myBuffer.size() && last_valid_point == 0 ; i++)
+                {
+                    for(j = i + 1 ; j < myBuffer.size() ; j++)
+                    {
+                        double l0 = Double.longBitsToDouble((Long)myBuffer.get(i).get(3));
+                        double l1 = Double.longBitsToDouble((Long)myBuffer.get(j).get(3));
+                        // check if point is valid point (not wild)
+                        if (Math.abs(l0 - l1) <= 10 && l0 > 0 && l1 > 0) {
+                            // found valid pair
+                            // first point in buffer is valid, so we send it out and proceed normaly
+                            if(i == 0)
+                            {
+                                byteswritten += WriteMapToOutputPort(myBuffer.remove(0));
+                                last_valid_point = l0;
+                            }
+                            else
+                            {
+                                // the first point is not a valid point. so set all points bevor the first valid one to the value of the first valid one.
+                                HashMap<Integer, Long> hm_valid = myBuffer.remove(i);
+                                // remove and send all invalid points
+                                for(; i > 0 ; i--)
+                                {
+                                    HashMap<Integer, Long> hm = myBuffer.remove(0);
+                                    Long lt = (Long)hm.get(3);
+                                    hm.put(new Integer(3), hm_valid.get(3));
+                                    hm.put(new Integer(6), lt);
+                                    byteswritten += WriteMapToOutputPort(hm);
+                                }
+                                // send out the valid point
+                                byteswritten += WriteMapToOutputPort(hm_valid);
+                                last_valid_point = Double.longBitsToDouble(hm_valid.get(3));
+                            }
+                            // break out of both loops
+                            i = myBuffer.size();
+                            break;
+                        }
+                    }
+                }
 
 				while (myBuffer.size() > 1) {
 				    double l0 = Double.longBitsToDouble((Long)myBuffer.get(0).get(3));
@@ -143,12 +182,11 @@ public class MiddlePressureWildPoints extends FilterFramework {
 				    }
 				}
 
-				if(myBuffer.size() > 2)
+				if(myBuffer.size() > 2 && last_valid_point > 0)
 				{
 				    //if first is not valid search vor next valid point
 				    boolean found_valid = false;
 				    HashMap<Integer, Long> hm_valid = new HashMap<Integer, Long>();// need init, just because java sucks
-				    int j;
 				    for(j = 0 ; j < myBuffer.size() && !found_valid ; j++)
 				    {
 						double lj = Double.longBitsToDouble((Long)myBuffer.get(j).get(3));
@@ -168,7 +206,6 @@ public class MiddlePressureWildPoints extends FilterFramework {
 						    HashMap<Integer, Long> hm = myBuffer.remove(0);
 						    Long lt = (Long)hm.get(3);
 						    hm.put(new Integer(3), (Long)Double.doubleToLongBits((last_valid_point + lv) / 2));
-						    System.out.println("Wild: " + Double.longBitsToDouble(lt) + " | Norm: " + (last_valid_point + lv) / 2 + " valid: " + last_valid_point);
 						    hm.put(new Integer(6), lt);
 						    byteswritten += WriteMapToOutputPort(hm);
 						}
@@ -186,11 +223,12 @@ public class MiddlePressureWildPoints extends FilterFramework {
 				    // valid point
 				    if (Math.abs(l0 - last_valid_point) <= 10 && l0 > 0) {
 						WriteMapToOutputPort(myBuffer.remove(0));
+                        last_valid_point = l0;
 				    } else {
-						// wild point
+						// wild point, set it to the value of the last valid point
 						HashMap<Integer, Long> hm = myBuffer.remove(0);
 						Long lt = (Long)hm.get(3);
-						hm.put(new Integer(3), (Long)Double.doubleToLongBits((l0 + last_valid_point) / 2));
+						hm.put(new Integer(3), (Long)Double.doubleToLongBits(last_valid_point));
 						hm.put(new Integer(6), lt);
 						WriteMapToOutputPort(hm);
 				    }
