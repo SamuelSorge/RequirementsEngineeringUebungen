@@ -1,6 +1,6 @@
 /******************************************************************************************************************
 * File: MiddleIgnoreFilter.java
-* @author Team Bud Spencer 
+* @author Team Bud Spencer
 * Course: Requirements Engineering und Software-Architektur
 * Project: Assignment 1
 * Copyright: Copyright (c) 2003 Carnegie Mellon University
@@ -21,13 +21,13 @@ public class MiddleIgnoreFilter extends ConvertMiddleFilter
 	/****************************************************************************
 	* This function checks the ID wether its temperature or altitude
 	*
-	* @param id used for comparison 
+	* @param id used for comparison
 	*
 	* @return the true, if id == 4|2 else false
 	****************************************************************************/
     boolean IgnoreData(int id)
     {
-        if(id == 4 || id == 2)
+        if(id == 4 || id == 2 || id == 0)
         {
             return false;
         }

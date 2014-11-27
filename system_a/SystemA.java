@@ -9,7 +9,7 @@
 *
 * Description:
 *
-* This class serves as main thread that instantiates and connects a set of filters. 
+* This class serves as main thread that instantiates and connects a set of filters.
 * This system consists of four filters: a source, two middle filters
 * that convert data, and a sink filter which generates an output file.
 *
@@ -34,7 +34,10 @@ public class SystemA
 
 		// midAltFilter is a middle filter which converts the temperature from Fahrenheit to Celsius
 		MiddleAltitudeFilter midAltFilter = new MiddleAltitudeFilter();
-		
+
+		// midIgnFilter is a middle filter which filters out unwanted data
+		MiddleIgnoreFilter midIgnFilter = new MiddleIgnoreFilter();
+
 		// sinkFilter is a sink filter which generates an output file "OutputA.dat" that contains the converted data in a given format
 		SinkFilter sinkFilter = new SinkE1();
 
@@ -45,8 +48,11 @@ public class SystemA
 		* At last we connect midTempFilter to the source filter (srcFilter).
 		****************************************************************************/
 
-		// Connect midAltFilter input port to sinkFilter output port
-		sinkFilter.Connect(midAltFilter);
+		// Connect midAltFilter input port to midAltFilter output port
+		sinkFilter.Connect(midIgnFilter);
+
+        // Connect midAltFilter input port to midIgnFilter output port
+        midIgnFilter.Connect(midAltFilter);
 
 		// Connect midTempFilter input port to midAltFilter output port
 		midAltFilter.Connect(midTempFilter);
@@ -61,6 +67,7 @@ public class SystemA
 		srcFilter.start();
 		midTempFilter.start();
 		midAltFilter.start();
+        midIgnFilter.start();
 		sinkFilter.start();
 
    } // main
